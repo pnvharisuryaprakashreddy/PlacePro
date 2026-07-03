@@ -1,6 +1,8 @@
-/target/
-/.idea/
+target/
+logs/
+.idea/
+.vscode/
+*.class
 *.iml
 config.properties
 /resumes/
-/logs/
