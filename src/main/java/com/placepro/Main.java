@@ -1,6 +1,9 @@
 package com.placepro;
 
-import javax.swing.JFrame;
+import com.placepro.ui.AppContext;
+import com.placepro.ui.common.UiExceptionHandler;
+import com.placepro.ui.login.LoginSelectionFrame;
+
 import javax.swing.SwingUtilities;
 
 public final class Main {
@@ -9,11 +12,9 @@ public final class Main {
     }
 
     public static void main(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler(new UiExceptionHandler());
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("PlacePro");
-            frame.setSize(900, 600);
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setLocationRelativeTo(null);
+            LoginSelectionFrame frame = new LoginSelectionFrame(AppContext.getAuthService());
             frame.setVisible(true);
         });
     }

@@ -46,7 +46,9 @@ public class AuthService {
         if (student.getBacklogCount() == null) {
             student.setBacklogCount(0);
         }
-        return studentDAO.insert(student);
+        Student savedStudent = studentDAO.insert(student);
+        sessionManager.setSession(savedStudent.getStudentId(), com.placepro.service.UserRole.STUDENT);
+        return savedStudent;
     }
 
     public Student loginStudent(String email, String plainPassword) {
