@@ -15,6 +15,7 @@ abstract class AbstractJdbcDAO {
 
     protected DataAccessException translateException(String operation, SQLException exception) {
         System.err.println("DAO error during " + operation + ": " + exception.getMessage());
+        com.placepro.monitoring.MetricsRegistry.get().recordError("dao");
         return new DataAccessException("A database error occurred while processing your request.", exception);
     }
 

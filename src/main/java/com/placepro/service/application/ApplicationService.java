@@ -90,17 +90,19 @@ public class ApplicationService {
         resumeDAO.findCurrentByStudentId(studentId)
                 .ifPresent(resume -> application.setResumeId(resume.getResumeId()));
 
-        return transactionRunner.execute(connection -> {
-            Application savedApplication = applicationDAO.insert(connection, application);
+        Application savedApplication = transactionRunner.execute(connection -> {
+            Application inserted = applicationDAO.insert(connection, application);
             notificationService.notifyStudent(
                     connection,
                     studentId,
                     "Application Submitted",
                     "Your application to " + drive.getJobTitle() + " was submitted successfully.",
                     "GENERAL",
-                    savedApplication.getApplicationId());
-            return savedApplication;
+                    inserted.getApplicationId());
+            return inserted;
         });
+        com.placepro.monitoring.MetricsRegistry.get().recordApplicationSubmitted();
+        return savedApplication;
     }
 
     public Application updateStatus(int applicationId, ApplicationStatus newStatus, int updatedByOfficerId) {
@@ -161,7 +163,7 @@ public class ApplicationService {
         }
         application.setStatus(newStatus.name());
 
-        return transactionRunner.execute(connection -> {
+        Application updated = transactionRunner.execute(connection -> {
             applicationDAO.update(connection, application);
             notificationService.notifyStudent(
                     connection,
@@ -175,6 +177,8 @@ public class ApplicationService {
                     applicationId);
             return application;
         });
+        com.placepro.monitoring.MetricsRegistry.get().recordStatusChange(newStatus.name());
+        return updated;
     }
 
     private List<ApplicationReviewRow> buildReviewRows(List<Application> applications) {

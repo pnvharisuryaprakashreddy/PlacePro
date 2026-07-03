@@ -77,7 +77,7 @@ public class InterviewService {
         PlacementDrive drive = placementDriveDAO.findById(application.getDriveId())
                 .orElseThrow(() -> new ServiceException("Placement drive not found."));
 
-        return transactionRunner.execute(connection -> {
+        InterviewSchedule scheduled = transactionRunner.execute(connection -> {
             InterviewSchedule savedInterview = interviewScheduleDAO.insert(connection, interviewSchedule);
             application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED.name());
             applicationDAO.update(connection, application);
@@ -96,6 +96,9 @@ public class InterviewService {
                     savedInterview.getInterviewId());
             return savedInterview;
         });
+        com.placepro.monitoring.MetricsRegistry.get()
+                .recordStatusChange(ApplicationStatus.INTERVIEW_SCHEDULED.name());
+        return scheduled;
     }
 
     public InterviewSchedule recordOutcome(int interviewId, String outcome, String notes) {
@@ -118,7 +121,7 @@ public class InterviewService {
             application.setStatus(newStatus.name());
         }
 
-        return transactionRunner.execute(connection -> {
+        InterviewSchedule updatedSchedule = transactionRunner.execute(connection -> {
             interviewScheduleDAO.update(connection, interviewSchedule);
             if (newStatus != null) {
                 applicationDAO.update(connection, application);
@@ -136,6 +139,10 @@ public class InterviewService {
             }
             return interviewSchedule;
         });
+        if (newStatus != null) {
+            com.placepro.monitoring.MetricsRegistry.get().recordStatusChange(newStatus.name());
+        }
+        return updatedSchedule;
     }
 
     public List<InterviewSchedule> getInterviewsForApplication(int applicationId) {

@@ -34,6 +34,7 @@ public final class DBConnection {
             }
         }
 
+        com.placepro.monitoring.MetricsRegistry.get().recordError("dao");
         throw new DatabaseConnectionException(
                 "Unable to connect to the database after 2 attempts. Check config.properties and ensure MySQL is running.",
                 lastException);

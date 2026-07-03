@@ -1,5 +1,15 @@
 package com.placepro.ui;
 
+import com.placepro.dao.ApplicationDAO;
+import com.placepro.dao.CompanyDAO;
+import com.placepro.dao.InterviewScheduleDAO;
+import com.placepro.dao.NotificationDAO;
+import com.placepro.dao.PlacementDriveDAO;
+import com.placepro.dao.PlacementOfficerDAO;
+import com.placepro.dao.RecruiterDAO;
+import com.placepro.dao.ReportDAO;
+import com.placepro.dao.ResumeDAO;
+import com.placepro.dao.StudentDAO;
 import com.placepro.dao.impl.ApplicationDAOImpl;
 import com.placepro.dao.impl.CompanyDAOImpl;
 import com.placepro.dao.impl.InterviewScheduleDAOImpl;
@@ -10,6 +20,7 @@ import com.placepro.dao.impl.RecruiterDAOImpl;
 import com.placepro.dao.impl.ReportDAOImpl;
 import com.placepro.dao.impl.ResumeDAOImpl;
 import com.placepro.dao.impl.StudentDAOImpl;
+import com.placepro.monitoring.DaoMetrics;
 import com.placepro.service.CompanyService;
 import com.placepro.service.ResumeService;
 import com.placepro.service.admin.UserManagementService;
@@ -29,16 +40,29 @@ import com.placepro.service.student.StudentDirectoryService;
 public final class AppContext {
 
     private static final SessionManager SESSION_MANAGER = new SessionManager();
-    private static final StudentDAOImpl STUDENT_DAO = new StudentDAOImpl();
-    private static final PlacementOfficerDAOImpl PLACEMENT_OFFICER_DAO = new PlacementOfficerDAOImpl();
-    private static final RecruiterDAOImpl RECRUITER_DAO = new RecruiterDAOImpl();
-    private static final CompanyDAOImpl COMPANY_DAO = new CompanyDAOImpl();
-    private static final PlacementDriveDAOImpl PLACEMENT_DRIVE_DAO = new PlacementDriveDAOImpl();
-    private static final ApplicationDAOImpl APPLICATION_DAO = new ApplicationDAOImpl();
-    private static final NotificationDAOImpl NOTIFICATION_DAO = new NotificationDAOImpl();
-    private static final ResumeDAOImpl RESUME_DAO = new ResumeDAOImpl();
-    private static final InterviewScheduleDAOImpl INTERVIEW_SCHEDULE_DAO = new InterviewScheduleDAOImpl();
-    private static final ReportDAOImpl REPORT_DAO = new ReportDAOImpl();
+
+    // Every DAO is wrapped in a thin metrics proxy that times each call for
+    // the placepro_db_query_duration_seconds histogram.
+    private static final StudentDAO STUDENT_DAO =
+            DaoMetrics.instrument(StudentDAO.class, new StudentDAOImpl());
+    private static final PlacementOfficerDAO PLACEMENT_OFFICER_DAO =
+            DaoMetrics.instrument(PlacementOfficerDAO.class, new PlacementOfficerDAOImpl());
+    private static final RecruiterDAO RECRUITER_DAO =
+            DaoMetrics.instrument(RecruiterDAO.class, new RecruiterDAOImpl());
+    private static final CompanyDAO COMPANY_DAO =
+            DaoMetrics.instrument(CompanyDAO.class, new CompanyDAOImpl());
+    private static final PlacementDriveDAO PLACEMENT_DRIVE_DAO =
+            DaoMetrics.instrument(PlacementDriveDAO.class, new PlacementDriveDAOImpl());
+    private static final ApplicationDAO APPLICATION_DAO =
+            DaoMetrics.instrument(ApplicationDAO.class, new ApplicationDAOImpl());
+    private static final NotificationDAO NOTIFICATION_DAO =
+            DaoMetrics.instrument(NotificationDAO.class, new NotificationDAOImpl());
+    private static final ResumeDAO RESUME_DAO =
+            DaoMetrics.instrument(ResumeDAO.class, new ResumeDAOImpl());
+    private static final InterviewScheduleDAO INTERVIEW_SCHEDULE_DAO =
+            DaoMetrics.instrument(InterviewScheduleDAO.class, new InterviewScheduleDAOImpl());
+    private static final ReportDAO REPORT_DAO =
+            DaoMetrics.instrument(ReportDAO.class, new ReportDAOImpl());
 
     private static final AuthService AUTH_SERVICE = new AuthService(
             STUDENT_DAO,

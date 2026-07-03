@@ -3,6 +3,7 @@ package com.placepro.service.auth;
 import com.placepro.model.PlacementOfficer;
 import com.placepro.model.Recruiter;
 import com.placepro.model.Student;
+import com.placepro.monitoring.MetricsRegistry;
 
 public class AuthService {
 
@@ -48,6 +49,7 @@ public class AuthService {
         }
         Student savedStudent = studentDAO.insert(student);
         sessionManager.setSession(savedStudent.getStudentId(), com.placepro.service.UserRole.STUDENT);
+        MetricsRegistry.get().sessionStarted();
         return savedStudent;
     }
 
@@ -65,6 +67,8 @@ public class AuthService {
 
         loginAttemptTracker.clearAttempts(accountKey);
         sessionManager.setSession(student.getStudentId(), com.placepro.service.UserRole.STUDENT);
+        MetricsRegistry.get().recordLogin("STUDENT", true);
+        MetricsRegistry.get().sessionStarted();
         return student;
     }
 
@@ -85,6 +89,8 @@ public class AuthService {
                 ? com.placepro.service.UserRole.ADMIN
                 : com.placepro.service.UserRole.OFFICER;
         sessionManager.setSession(officer.getOfficerId(), role);
+        MetricsRegistry.get().recordLogin(role.name(), true);
+        MetricsRegistry.get().sessionStarted();
         return officer;
     }
 
@@ -102,10 +108,15 @@ public class AuthService {
 
         loginAttemptTracker.clearAttempts(accountKey);
         sessionManager.setSession(recruiter.getRecruiterId(), com.placepro.service.UserRole.RECRUITER);
+        MetricsRegistry.get().recordLogin("RECRUITER", true);
+        MetricsRegistry.get().sessionStarted();
         return recruiter;
     }
 
     public void logout() {
+        if (sessionManager.getCurrentRole().isPresent()) {
+            MetricsRegistry.get().sessionEnded();
+        }
         sessionManager.logout();
     }
 
@@ -145,6 +156,8 @@ public class AuthService {
 
     private com.placepro.service.ServiceException handleFailedLogin(String accountKey, String message) {
         loginAttemptTracker.recordFailedAttempt(accountKey);
+        String role = accountKey.substring(0, accountKey.indexOf(':')).toUpperCase(java.util.Locale.ENGLISH);
+        MetricsRegistry.get().recordLogin(role, false);
         return new com.placepro.service.ServiceException(message);
     }
 }

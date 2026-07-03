@@ -1,5 +1,7 @@
 package com.placepro;
 
+import com.placepro.config.AppConfig;
+import com.placepro.monitoring.MetricsRegistry;
 import com.placepro.ui.AppContext;
 import com.placepro.ui.common.UiExceptionHandler;
 import com.placepro.ui.login.LoginSelectionFrame;
@@ -13,9 +15,24 @@ public final class Main {
 
     public static void main(String[] args) {
         Thread.setDefaultUncaughtExceptionHandler(new UiExceptionHandler());
+        startMonitoring();
         SwingUtilities.invokeLater(() -> {
             LoginSelectionFrame frame = new LoginSelectionFrame(AppContext.getAuthService());
             frame.setVisible(true);
         });
+    }
+
+    /**
+     * Optional operational monitoring. Any failure here (bad config, port in
+     * use, missing classes) is logged and ignored so the placement workflow
+     * always starts normally.
+     */
+    private static void startMonitoring() {
+        try {
+            int port = AppConfig.getIntProperty("metrics.port", 9400);
+            MetricsRegistry.get().startHttpServer(port);
+        } catch (Throwable throwable) {
+            System.err.println("[monitoring] WARNING: monitoring disabled: " + throwable.getMessage());
+        }
     }
 }

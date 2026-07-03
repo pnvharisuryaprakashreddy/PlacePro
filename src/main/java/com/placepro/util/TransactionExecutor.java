@@ -24,9 +24,11 @@ public final class TransactionExecutor {
                 throw exception;
             } catch (SQLException exception) {
                 rollbackQuietly(connection);
+                com.placepro.monitoring.MetricsRegistry.get().recordError("service");
                 throw new DatabaseConnectionException("Failed to complete database transaction.", exception);
             }
         } catch (SQLException exception) {
+            com.placepro.monitoring.MetricsRegistry.get().recordError("service");
             throw new DatabaseConnectionException("Failed to start database transaction.", exception);
         }
     }

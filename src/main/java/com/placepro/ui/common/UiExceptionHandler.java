@@ -19,15 +19,16 @@ public final class UiExceptionHandler implements Thread.UncaughtExceptionHandler
 
     public static void handleServiceFailure(Component parent, Exception exception) {
         Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
-        if (cause instanceof ServiceException) {
-            handle(parent, exception);
-            return;
+        if (!(cause instanceof ServiceException)) {
+            // Expected validation failures (ServiceException) are not counted as errors.
+            com.placepro.monitoring.MetricsRegistry.get().recordError("ui");
         }
         handle(parent, exception);
     }
 
     @Override
     public void uncaughtException(Thread thread, Throwable throwable) {
+        com.placepro.monitoring.MetricsRegistry.get().recordError("ui");
         System.err.println("Uncaught UI exception on thread " + thread.getName() + ": " + throwable.getMessage());
         throwable.printStackTrace(System.err);
 

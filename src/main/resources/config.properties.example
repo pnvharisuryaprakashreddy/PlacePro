@@ -3,3 +3,6 @@ db.user=your_username
 db.password=your_password
 resumes.directory=resumes
 resumes.maxSizeKb=2048
+# Port for the optional Prometheus /metrics endpoint. Change per machine if
+# several PlacePro clients run on the same host during testing.
+metrics.port=9400
