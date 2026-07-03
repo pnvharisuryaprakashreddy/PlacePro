@@ -30,6 +30,10 @@ public final class AppConfig {
         return Integer.parseInt(value.trim());
     }
 
+    public static int getResumesMaxSizeKb() {
+        return getIntProperty("resumes.maxSizeKb", 2048);
+    }
+
     private static Properties loadProperties() {
         Properties properties = new Properties();
         try (InputStream inputStream = AppConfig.class.getClassLoader().getResourceAsStream(CONFIG_FILE)) {

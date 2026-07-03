@@ -56,6 +56,11 @@ public class ResumeService {
         return resumeDAO.findByStudentId(studentId);
     }
 
+    public java.util.Optional<Resume> getCurrentResumeForStudent(int studentId) {
+        AuthorizationHelper.requireSelfOrRole(sessionManager, studentId, UserRole.STUDENT);
+        return resumeDAO.findCurrentByStudentId(studentId);
+    }
+
     private void validateFileType(String fileType) {
         if (!ALLOWED_FILE_TYPES.contains(fileType)) {
             throw new ServiceException("Only PDF and DOC resume files are allowed.");

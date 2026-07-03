@@ -68,6 +68,21 @@ public class DriveService {
         return transitionDrive(driveId, DriveStatus.CLOSED, DriveStatus.COMPLETED);
     }
 
+    public List<PlacementDrive> listPublishedDrivesForStudent() {
+        AuthorizationHelper.requireRole(sessionManager, UserRole.STUDENT);
+        return placementDriveDAO.findPublishedDrives();
+    }
+
+    public PlacementDrive getPublishedDriveForStudent(int driveId) {
+        AuthorizationHelper.requireRole(sessionManager, UserRole.STUDENT);
+        PlacementDrive drive = placementDriveDAO.findById(driveId)
+                .orElseThrow(() -> new ServiceException("Placement drive not found."));
+        if (!DriveStatus.PUBLISHED.name().equals(drive.getStatus())) {
+            throw new ServiceException("This drive is not available to students.");
+        }
+        return drive;
+    }
+
     private PlacementDrive transitionDrive(int driveId, DriveStatus expectedStatus, DriveStatus nextStatus) {
         AuthorizationHelper.requireRole(sessionManager, UserRole.OFFICER, UserRole.ADMIN);
 

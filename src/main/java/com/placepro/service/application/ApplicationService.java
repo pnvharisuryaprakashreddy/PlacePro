@@ -118,4 +118,14 @@ public class ApplicationService {
             return application;
         });
     }
+
+    public java.util.List<Application> listApplicationsForStudent(int studentId) {
+        AuthorizationHelper.requireSelfOrRole(sessionManager, studentId, UserRole.STUDENT);
+        return applicationDAO.findByStudentId(studentId);
+    }
+
+    public java.util.Optional<Application> findApplicationForStudent(int studentId, int driveId) {
+        AuthorizationHelper.requireSelfOrRole(sessionManager, studentId, UserRole.STUDENT);
+        return applicationDAO.findByStudentAndDrive(studentId, driveId);
+    }
 }
