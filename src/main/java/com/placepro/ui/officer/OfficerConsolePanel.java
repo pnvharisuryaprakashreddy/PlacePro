@@ -10,7 +10,6 @@ import com.placepro.service.drive.DriveService;
 import com.placepro.ui.AppContext;
 import com.placepro.ui.common.LogoutButton;
 import com.placepro.ui.common.NotificationBellComponent;
-import com.placepro.ui.common.PlaceholderPanel;
 import com.placepro.ui.common.UiStyles;
 
 import javax.swing.JLabel;
@@ -46,7 +45,7 @@ public class OfficerConsolePanel extends JPanel {
         tabs.addTab("Drives", new DriveListPanel(driveService, companyService, sessionManager));
         tabs.addTab("Applications", new OfficerApplicationsPanel(
                 officer, driveService, applicationService, interviewService));
-        tabs.addTab("Reports", new PlaceholderPanel("Placement reports will be available in a later release."));
+        tabs.addTab("Reports", new ReportsPanel(AppContext.getReportService(), companyService));
         add(tabs, BorderLayout.CENTER);
     }
 }

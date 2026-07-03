@@ -16,6 +16,8 @@
         <mysql.connector.version>9.3.0</mysql.connector.version>
         <jbcrypt.version>0.4</jbcrypt.version>
         <gson.version>2.11.0</gson.version>
+        <pdfbox.version>2.0.34</pdfbox.version>
+        <jfreechart.version>1.5.6</jfreechart.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
         <maven.jar.plugin.version>3.4.2</maven.jar.plugin.version>
         <maven.shade.plugin.version>3.6.0</maven.shade.plugin.version>
@@ -37,6 +39,16 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>${gson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>${pdfbox.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>${jfreechart.version}</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

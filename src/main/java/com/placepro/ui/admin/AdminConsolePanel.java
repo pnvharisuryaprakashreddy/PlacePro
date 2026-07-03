@@ -11,11 +11,11 @@ import com.placepro.service.drive.DriveService;
 import com.placepro.ui.AppContext;
 import com.placepro.ui.common.LogoutButton;
 import com.placepro.ui.common.NotificationBellComponent;
-import com.placepro.ui.common.PlaceholderPanel;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.officer.CompanyListPanel;
 import com.placepro.ui.officer.DriveListPanel;
 import com.placepro.ui.officer.OfficerApplicationsPanel;
+import com.placepro.ui.officer.ReportsPanel;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -51,7 +51,8 @@ public class AdminConsolePanel extends JPanel {
         tabs.addTab("Drives", new DriveListPanel(driveService, companyService, sessionManager));
         tabs.addTab("Applications", new OfficerApplicationsPanel(
                 admin, driveService, applicationService, interviewService));
-        tabs.addTab("Reports", new PlaceholderPanel("Placement reports will be available in a later release."));
+        tabs.addTab("Reports", new ReportsPanel(AppContext.getReportService(), companyService));
+        tabs.addTab("Analytics", new AnalyticsDashboardPanel(AppContext.getReportService()));
 
         if (SessionManagerRole.isAdmin(sessionManager)) {
             tabs.addTab("User Management", new UserManagementPanel(userManagementService));

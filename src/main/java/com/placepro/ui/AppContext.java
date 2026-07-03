@@ -7,6 +7,7 @@ import com.placepro.dao.impl.NotificationDAOImpl;
 import com.placepro.dao.impl.PlacementDriveDAOImpl;
 import com.placepro.dao.impl.PlacementOfficerDAOImpl;
 import com.placepro.dao.impl.RecruiterDAOImpl;
+import com.placepro.dao.impl.ReportDAOImpl;
 import com.placepro.dao.impl.ResumeDAOImpl;
 import com.placepro.dao.impl.StudentDAOImpl;
 import com.placepro.service.CompanyService;
@@ -20,6 +21,7 @@ import com.placepro.service.drive.DriveService;
 import com.placepro.service.drive.EligibilityService;
 import com.placepro.service.notification.NotificationService;
 import com.placepro.service.recruiter.RecruiterService;
+import com.placepro.service.report.ReportService;
 import com.placepro.service.student.ApplicationTrackingService;
 import com.placepro.service.student.DashboardService;
 
@@ -35,6 +37,7 @@ public final class AppContext {
     private static final NotificationDAOImpl NOTIFICATION_DAO = new NotificationDAOImpl();
     private static final ResumeDAOImpl RESUME_DAO = new ResumeDAOImpl();
     private static final InterviewScheduleDAOImpl INTERVIEW_SCHEDULE_DAO = new InterviewScheduleDAOImpl();
+    private static final ReportDAOImpl REPORT_DAO = new ReportDAOImpl();
 
     private static final AuthService AUTH_SERVICE = new AuthService(
             STUDENT_DAO,
@@ -88,6 +91,12 @@ public final class AppContext {
             STUDENT_DAO,
             RESUME_DAO,
             INTERVIEW_SCHEDULE_DAO,
+            SESSION_MANAGER);
+    private static final ReportService REPORT_SERVICE = new ReportService(
+            PLACEMENT_DRIVE_DAO,
+            APPLICATION_DAO,
+            STUDENT_DAO,
+            REPORT_DAO,
             SESSION_MANAGER);
     private static final UserManagementService USER_MANAGEMENT_SERVICE = new UserManagementService(
             STUDENT_DAO,
@@ -149,5 +158,9 @@ public final class AppContext {
 
     public static UserManagementService getUserManagementService() {
         return USER_MANAGEMENT_SERVICE;
+    }
+
+    public static ReportService getReportService() {
+        return REPORT_SERVICE;
     }
 }

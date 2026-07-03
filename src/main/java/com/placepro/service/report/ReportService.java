@@ -2,6 +2,7 @@ package com.placepro.service.report;
 
 import com.placepro.dao.ApplicationDAO;
 import com.placepro.dao.PlacementDriveDAO;
+import com.placepro.dao.ReportDAO;
 import com.placepro.dao.StudentDAO;
 import com.placepro.model.Application;
 import com.placepro.model.PlacementDrive;
@@ -22,16 +23,44 @@ public class ReportService {
     private final PlacementDriveDAO placementDriveDAO;
     private final ApplicationDAO applicationDAO;
     private final StudentDAO studentDAO;
+    private final ReportDAO reportDAO;
     private final SessionManager sessionManager;
 
     public ReportService(PlacementDriveDAO placementDriveDAO,
                          ApplicationDAO applicationDAO,
                          StudentDAO studentDAO,
+                         ReportDAO reportDAO,
                          SessionManager sessionManager) {
         this.placementDriveDAO = placementDriveDAO;
         this.applicationDAO = applicationDAO;
         this.studentDAO = studentDAO;
+        this.reportDAO = reportDAO;
         this.sessionManager = sessionManager;
+    }
+
+    public ReportTable getPlacementSummaryByDepartment(ReportFilter filter) {
+        AuthorizationHelper.requireRole(sessionManager, UserRole.OFFICER, UserRole.ADMIN);
+        return reportDAO.placementSummaryByDepartment(filter);
+    }
+
+    public ReportTable getCompanySelectionStatistics(ReportFilter filter) {
+        AuthorizationHelper.requireRole(sessionManager, UserRole.OFFICER, UserRole.ADMIN);
+        return reportDAO.companySelectionStatistics(filter);
+    }
+
+    public ReportTable getDriveApplicantFunnel(ReportFilter filter) {
+        AuthorizationHelper.requireRole(sessionManager, UserRole.OFFICER, UserRole.ADMIN);
+        return reportDAO.driveApplicantFunnel(filter);
+    }
+
+    public ReportTable getStudentPlacementRecords(ReportFilter filter) {
+        AuthorizationHelper.requireRole(sessionManager, UserRole.OFFICER, UserRole.ADMIN);
+        return reportDAO.studentPlacementRecords(filter);
+    }
+
+    public AnalyticsSnapshot getAnalyticsSnapshot() {
+        AuthorizationHelper.requireRole(sessionManager, UserRole.OFFICER, UserRole.ADMIN);
+        return reportDAO.analyticsSnapshot();
     }
 
     public List<DrivePlacementSummary> getDriveWiseSummary() {
