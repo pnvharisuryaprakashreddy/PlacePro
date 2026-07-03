@@ -193,11 +193,10 @@ CREATE TABLE notifications (
         FOREIGN KEY (recruiter_id)
         REFERENCES recruiters(recruiter_id)
         ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    CONSTRAINT chk_notifications_exactly_one_recipient
-        CHECK (
-            (student_id IS NOT NULL) +
-            (officer_id IS NOT NULL) +
-            (recruiter_id IS NOT NULL) = 1
-        )
+        ON UPDATE CASCADE
 ) ENGINE=InnoDB;
+
+-- MySQL 9.x does not allow CHECK constraints that reference columns participating
+-- in foreign keys in this form. The intended business rule remains unchanged:
+-- exactly one of student_id, officer_id, or recruiter_id must be non-null for
+-- each notification row, and this should be enforced in the application layer.

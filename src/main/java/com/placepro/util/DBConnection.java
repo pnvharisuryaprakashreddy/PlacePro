@@ -24,7 +24,7 @@ public final class DBConnection {
                 return DriverManager.getConnection(
                         getRequiredProperty("db.url"),
                         getRequiredProperty("db.user"),
-                        getRequiredProperty("db.password"));
+                        getPassword());
             } catch (SQLException exception) {
                 lastException = exception;
             }
@@ -57,5 +57,10 @@ public final class DBConnection {
             throw new DatabaseConnectionException("Missing required database property: " + key, null);
         }
         return value.trim();
+    }
+
+    private static String getPassword() {
+        String value = PROPERTIES.getProperty("db.password");
+        return Objects.isNull(value) ? "" : value;
     }
 }
