@@ -126,6 +126,33 @@ class ApplicationServiceTest {
         assertEquals(0, notificationDAO.insertCount);
     }
 
+    @Test
+    void transactionalInsertRollsBackWhenNotificationFails() {
+        eligibilityService.setResult(EligibilityResult.eligible());
+        TransactionalStubApplicationDAO transactionalApplicationDAO = new TransactionalStubApplicationDAO();
+        StubNotificationDAO failingNotificationDAO = new StubNotificationDAO();
+        failingNotificationDAO.failOnInsert = true;
+
+        NotificationService failingNotificationService = new NotificationService(
+                failingNotificationDAO, sessionManager);
+
+        ApplicationService transactionalService = new ApplicationService(
+                transactionalApplicationDAO,
+                failingNotificationService,
+                placementDriveDAO,
+                new StubCompanyDAO(),
+                resumeDAO,
+                studentDAO,
+                eligibilityService,
+                sessionManager,
+                new CommitAwareTransactionRunner(transactionalApplicationDAO));
+
+        assertThrows(RuntimeException.class, () -> transactionalService.submitApplication(1, 100));
+        assertEquals(1, transactionalApplicationDAO.insertAttempts);
+        assertEquals(0, transactionalApplicationDAO.committedInserts);
+        assertTrue(transactionalApplicationDAO.findByStudentAndDrive(1, 100).isEmpty());
+    }
+
     private PlacementDrive drive(int id, String title) {
         PlacementDrive drive = new PlacementDrive();
         drive.setDriveId(id);
@@ -165,12 +192,61 @@ class ApplicationServiceTest {
         }
     }
 
-    private static final class StubApplicationDAO implements ApplicationDAO {
-        private final Map<String, Application> applications = new HashMap<>();
-        private final AtomicInteger idSequence = new AtomicInteger(1000);
-        private int insertCount;
+    private static final class CommitAwareTransactionRunner implements TransactionRunner {
+        private final TransactionalStubApplicationDAO applicationDAO;
 
-        void save(Application application) {
+        CommitAwareTransactionRunner(TransactionalStubApplicationDAO applicationDAO) {
+            this.applicationDAO = applicationDAO;
+        }
+
+        @Override
+        public <T> T execute(TransactionCallback<T> callback) {
+            try {
+                T result = callback.execute(null);
+                applicationDAO.commitPending();
+                return result;
+            } catch (RuntimeException exception) {
+                applicationDAO.rollbackPending();
+                throw exception;
+            } catch (SQLException exception) {
+                applicationDAO.rollbackPending();
+                throw new RuntimeException(exception);
+            }
+        }
+    }
+
+    private static final class TransactionalStubApplicationDAO extends StubApplicationDAO {
+        private Application pendingInsert;
+        private int insertAttempts;
+        private int committedInserts;
+
+        void commitPending() {
+            if (pendingInsert != null) {
+                save(pendingInsert);
+                committedInserts++;
+                pendingInsert = null;
+            }
+        }
+
+        void rollbackPending() {
+            pendingInsert = null;
+        }
+
+        @Override
+        public Application insert(Connection connection, Application application) {
+            insertAttempts++;
+            application.setApplicationId(idSequence.incrementAndGet());
+            pendingInsert = application;
+            return application;
+        }
+    }
+
+    private static class StubApplicationDAO implements ApplicationDAO {
+        private final Map<String, Application> applications = new HashMap<>();
+        protected final AtomicInteger idSequence = new AtomicInteger(1000);
+        protected int insertCount;
+
+        protected void save(Application application) {
             applications.put(key(application.getStudentId(), application.getDriveId()), application);
         }
 
@@ -234,8 +310,9 @@ class ApplicationServiceTest {
         }
     }
 
-    private static final class StubNotificationDAO implements NotificationDAO {
+    private static class StubNotificationDAO implements NotificationDAO {
         private int insertCount;
+        private boolean failOnInsert;
 
         @Override
         public Notification insert(Notification notification) {
@@ -245,6 +322,9 @@ class ApplicationServiceTest {
         @Override
         public Notification insert(Connection connection, Notification notification) {
             insertCount++;
+            if (failOnInsert) {
+                throw new RuntimeException("Simulated notification insert failure.");
+            }
             notification.setNotificationId(1);
             return notification;
         }

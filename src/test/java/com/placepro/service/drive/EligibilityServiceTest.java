@@ -57,6 +57,32 @@ class EligibilityServiceTest {
         assertTrue(reasons.stream().anyMatch(reason -> reason.contains("Branch")));
     }
 
+    @Test
+    void expiredApplicationDeadlineIsRejected() {
+        studentDAO.save(student(3, "CSE", new BigDecimal("8.00"), 0));
+        PlacementDrive drive = drive(30, new BigDecimal("7.00"), 0, "CSE");
+        drive.setApplicationDeadline(LocalDateTime.now().minusDays(1));
+        placementDriveDAO.save(drive);
+
+        EligibilityResult result = eligibilityService.check(3, 30);
+
+        assertFalse(result.isEligible());
+        assertTrue(result.getReasons().stream().anyMatch(reason -> reason.contains("deadline")));
+    }
+
+    @Test
+    void unpublishedDriveIsRejected() {
+        studentDAO.save(student(4, "CSE", new BigDecimal("8.00"), 0));
+        PlacementDrive drive = drive(40, new BigDecimal("7.00"), 0, "CSE");
+        drive.setStatus(DriveStatus.DRAFT.name());
+        placementDriveDAO.save(drive);
+
+        EligibilityResult result = eligibilityService.check(4, 40);
+
+        assertFalse(result.isEligible());
+        assertTrue(result.getReasons().stream().anyMatch(reason -> reason.contains("not open")));
+    }
+
     private Student student(int id, String branch, BigDecimal cgpa, int backlogs) {
         Student student = new Student();
         student.setStudentId(id);
