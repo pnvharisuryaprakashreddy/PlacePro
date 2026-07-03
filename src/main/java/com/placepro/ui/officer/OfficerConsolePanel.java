@@ -42,6 +42,9 @@ public class OfficerConsolePanel extends JPanel {
 
         JTabbedPane tabs = new JTabbedPane();
         tabs.addTab("Companies", new CompanyListPanel(companyService));
+        tabs.addTab("Students", new StudentListPanel(
+                AppContext.getStudentDirectoryService(),
+                AppContext.getApplicationTrackingService()));
         tabs.addTab("Drives", new DriveListPanel(driveService, companyService, sessionManager));
         tabs.addTab("Applications", new OfficerApplicationsPanel(
                 officer, driveService, applicationService, interviewService));

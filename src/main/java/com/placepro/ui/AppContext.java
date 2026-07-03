@@ -24,6 +24,7 @@ import com.placepro.service.recruiter.RecruiterService;
 import com.placepro.service.report.ReportService;
 import com.placepro.service.student.ApplicationTrackingService;
 import com.placepro.service.student.DashboardService;
+import com.placepro.service.student.StudentDirectoryService;
 
 public final class AppContext {
 
@@ -91,6 +92,10 @@ public final class AppContext {
             STUDENT_DAO,
             RESUME_DAO,
             INTERVIEW_SCHEDULE_DAO,
+            SESSION_MANAGER);
+    private static final StudentDirectoryService STUDENT_DIRECTORY_SERVICE = new StudentDirectoryService(
+            STUDENT_DAO,
+            RESUME_DAO,
             SESSION_MANAGER);
     private static final ReportService REPORT_SERVICE = new ReportService(
             PLACEMENT_DRIVE_DAO,
@@ -162,5 +167,9 @@ public final class AppContext {
 
     public static ReportService getReportService() {
         return REPORT_SERVICE;
+    }
+
+    public static StudentDirectoryService getStudentDirectoryService() {
+        return STUDENT_DIRECTORY_SERVICE;
     }
 }

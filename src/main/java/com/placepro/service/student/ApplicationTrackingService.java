@@ -38,7 +38,9 @@ public class ApplicationTrackingService {
     }
 
     public List<ApplicationTrackingRow> listTrackingForStudent(int studentId) {
-        AuthorizationHelper.requireSelfOrRole(sessionManager, studentId, UserRole.STUDENT);
+        // A student may view their own applications; officers and admins may view any student's.
+        AuthorizationHelper.requireSelfOrRole(sessionManager, studentId,
+                UserRole.OFFICER, UserRole.ADMIN);
 
         List<ApplicationTrackingRow> rows = new ArrayList<>();
         for (Application application : applicationDAO.findByStudentId(studentId)) {

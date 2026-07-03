@@ -3,6 +3,9 @@ package com.placepro.ui.officer;
 import com.placepro.model.Company;
 import com.placepro.service.CompanyService;
 import com.placepro.service.ServiceException;
+import com.placepro.service.report.ReportFilter;
+import com.placepro.service.report.ReportTable;
+import com.placepro.ui.AppContext;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.common.UiTasks;
 
@@ -29,6 +32,8 @@ public class CompanyListPanel extends JPanel {
     private final JTextField nameFilterField = new JTextField(12);
     private final JTextField industryFilterField = new JTextField(12);
     private final JComboBox<String> activeFilterCombo = new JComboBox<>(new String[]{"ALL", "ACTIVE", "INACTIVE"});
+    private final JComboBox<String> driveFilterCombo = new JComboBox<>(
+            new String[]{"ALL", "WITH ACTIVE DRIVES", "WITHOUT ACTIVE DRIVES"});
     private final JLabel statusLabel = new JLabel(" ");
     private final DefaultTableModel tableModel = new DefaultTableModel(COLUMN_NAMES, 0) {
         @Override
@@ -54,6 +59,8 @@ public class CompanyListPanel extends JPanel {
         filterPanel.add(industryFilterField);
         filterPanel.add(new JLabel("Status"));
         filterPanel.add(activeFilterCombo);
+        filterPanel.add(new JLabel("Drives"));
+        filterPanel.add(driveFilterCombo);
 
         JButton searchButton = new JButton("Search");
         searchButton.addActionListener(event -> loadCompanies());
@@ -70,21 +77,26 @@ public class CompanyListPanel extends JPanel {
         editButton.addActionListener(event -> editSelectedCompany());
         JButton deactivateButton = new JButton("Deactivate");
         deactivateButton.addActionListener(event -> deactivateSelectedCompany());
+        JButton drillDownButton = new JButton("View Drives & Outcomes");
+        drillDownButton.addActionListener(event -> showDriveDrillDown());
 
         actionPanel.add(addButton);
         actionPanel.add(editButton);
         actionPanel.add(deactivateButton);
+        actionPanel.add(drillDownButton);
         actionPanel.add(statusLabel);
         add(actionPanel, BorderLayout.SOUTH);
     }
 
     public void loadCompanies() {
         statusLabel.setText("Loading companies...");
+        String driveFilter = ((String) driveFilterCombo.getSelectedItem()).replace(' ', '_');
         UiTasks.run(
                 () -> companyService.searchCompanies(
                         nameFilterField.getText(),
                         industryFilterField.getText(),
-                        (String) activeFilterCombo.getSelectedItem()),
+                        (String) activeFilterCombo.getSelectedItem(),
+                        driveFilter),
                 this::populateTable,
                 this::showError);
     }
@@ -159,6 +171,50 @@ public class CompanyListPanel extends JPanel {
                 .filter(company -> company.getCompanyId() == companyId)
                 .findFirst()
                 .orElse(null);
+    }
+
+    private void showDriveDrillDown() {
+        Company selected = getSelectedCompany();
+        if (selected == null) {
+            statusLabel.setText("Select a company to view its drives.");
+            return;
+        }
+        statusLabel.setText("Loading drives for " + selected.getCompanyName() + "...");
+        ReportFilter filter = new ReportFilter(null, null, selected.getCompanyId(), null, null);
+        UiTasks.run(
+                () -> AppContext.getReportService().getDriveApplicantFunnel(filter),
+                report -> {
+                    statusLabel.setText(" ");
+                    showDrillDownDialog(selected, report);
+                },
+                this::showError);
+    }
+
+    private void showDrillDownDialog(Company company, ReportTable report) {
+        DefaultTableModel model = new DefaultTableModel(report.getColumns().toArray(), 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        for (java.util.List<Object> row : report.getRows()) {
+            model.addRow(row.toArray());
+        }
+
+        javax.swing.JDialog dialog = new javax.swing.JDialog(
+                javax.swing.SwingUtilities.getWindowAncestor(this),
+                "Drives & Placement Outcomes - " + company.getCompanyName(),
+                java.awt.Dialog.ModalityType.APPLICATION_MODAL);
+        JPanel content = new JPanel(new BorderLayout(8, 8));
+        content.add(new JLabel(report.getRows().isEmpty()
+                ? "This company has no placement drives yet."
+                : report.getRows().size() + " drive(s). Counts show applied / shortlisted / interviewed / selected."),
+                BorderLayout.NORTH);
+        content.add(new JScrollPane(new JTable(model)), BorderLayout.CENTER);
+        dialog.setContentPane(content);
+        dialog.setSize(760, 340);
+        dialog.setLocationRelativeTo(this);
+        dialog.setVisible(true);
     }
 
     private void showError(Exception exception) {

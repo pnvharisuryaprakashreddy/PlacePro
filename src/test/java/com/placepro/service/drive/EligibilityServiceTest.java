@@ -121,6 +121,17 @@ class EligibilityServiceTest {
         }
 
         @Override
+        public List<com.placepro.dao.StudentSearchRow> searchStudents(
+                com.placepro.dao.StudentSearchCriteria criteria, int offset, int limit) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int countStudents(com.placepro.dao.StudentSearchCriteria criteria) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public boolean update(Student student) {
             throw new UnsupportedOperationException();
         }

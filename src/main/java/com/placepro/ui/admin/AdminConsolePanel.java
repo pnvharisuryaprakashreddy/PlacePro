@@ -16,6 +16,7 @@ import com.placepro.ui.officer.CompanyListPanel;
 import com.placepro.ui.officer.DriveListPanel;
 import com.placepro.ui.officer.OfficerApplicationsPanel;
 import com.placepro.ui.officer.ReportsPanel;
+import com.placepro.ui.officer.StudentListPanel;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -48,6 +49,9 @@ public class AdminConsolePanel extends JPanel {
 
         JTabbedPane tabs = new JTabbedPane();
         tabs.addTab("Companies", new CompanyListPanel(companyService));
+        tabs.addTab("Students", new StudentListPanel(
+                AppContext.getStudentDirectoryService(),
+                AppContext.getApplicationTrackingService()));
         tabs.addTab("Drives", new DriveListPanel(driveService, companyService, sessionManager));
         tabs.addTab("Applications", new OfficerApplicationsPanel(
                 admin, driveService, applicationService, interviewService));

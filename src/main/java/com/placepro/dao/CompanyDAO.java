@@ -19,6 +19,14 @@ public interface CompanyDAO {
 
     List<Company> searchByName(String keyword);
 
+    /**
+     * Server-side company search. Blank/null filters are ignored.
+     *
+     * @param activeFilter "ACTIVE", "INACTIVE", or null/"ALL"
+     * @param driveFilter  "WITH_ACTIVE_DRIVES", "WITHOUT_ACTIVE_DRIVES", or null/"ALL"
+     */
+    List<Company> searchCompanies(String nameKeyword, String industryKeyword, String activeFilter, String driveFilter);
+
     boolean update(Company company);
 
     boolean deactivate(int companyId);

@@ -69,6 +69,53 @@ public class CompanyDAOImpl extends AbstractJdbcDAO implements CompanyDAO {
     }
 
     @Override
+    public List<Company> searchCompanies(String nameKeyword,
+                                         String industryKeyword,
+                                         String activeFilter,
+                                         String driveFilter) {
+        StringBuilder sql = new StringBuilder("SELECT c.* FROM companies c WHERE 1 = 1");
+        List<Object> params = new ArrayList<>();
+
+        if (nameKeyword != null && !nameKeyword.isBlank()) {
+            sql.append(" AND c.company_name LIKE ?");
+            params.add("%" + nameKeyword.trim() + "%");
+        }
+        if (industryKeyword != null && !industryKeyword.isBlank()) {
+            sql.append(" AND c.industry LIKE ?");
+            params.add("%" + industryKeyword.trim() + "%");
+        }
+        if ("ACTIVE".equalsIgnoreCase(activeFilter)) {
+            sql.append(" AND c.is_active = 1");
+        } else if ("INACTIVE".equalsIgnoreCase(activeFilter)) {
+            sql.append(" AND c.is_active = 0");
+        }
+        if ("WITH_ACTIVE_DRIVES".equalsIgnoreCase(driveFilter)) {
+            sql.append(" AND EXISTS (SELECT 1 FROM placement_drives d"
+                    + " WHERE d.company_id = c.company_id AND d.status = 'PUBLISHED')");
+        } else if ("WITHOUT_ACTIVE_DRIVES".equalsIgnoreCase(driveFilter)) {
+            sql.append(" AND NOT EXISTS (SELECT 1 FROM placement_drives d"
+                    + " WHERE d.company_id = c.company_id AND d.status = 'PUBLISHED')");
+        }
+        sql.append(" ORDER BY c.company_name");
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            for (int index = 0; index < params.size(); index++) {
+                statement.setObject(index + 1, params.get(index));
+            }
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<Company> companies = new ArrayList<>();
+                while (resultSet.next()) {
+                    companies.add(mapRow(resultSet));
+                }
+                return companies;
+            }
+        } catch (SQLException exception) {
+            throw translateException("company search", exception);
+        }
+    }
+
+    @Override
     public boolean update(Company company) {
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {

@@ -5,8 +5,6 @@ import com.placepro.model.Company;
 import com.placepro.service.auth.SessionManager;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.stream.Collectors;
 
 public class CompanyService {
 
@@ -46,19 +44,16 @@ public class CompanyService {
     }
 
     public List<Company> searchCompanies(String nameKeyword, String industryKeyword, String activeFilter) {
+        return searchCompanies(nameKeyword, industryKeyword, activeFilter, null);
+    }
+
+    public List<Company> searchCompanies(String nameKeyword,
+                                         String industryKeyword,
+                                         String activeFilter,
+                                         String driveFilter) {
         AuthorizationHelper.requireRole(sessionManager, UserRole.OFFICER, UserRole.ADMIN);
-
-        String normalizedName = nameKeyword == null ? "" : nameKeyword.trim().toLowerCase(Locale.ENGLISH);
-        String normalizedIndustry = industryKeyword == null ? "" : industryKeyword.trim().toLowerCase(Locale.ENGLISH);
-
-        return companyDAO.findAll().stream()
-                .filter(company -> matchesActiveFilter(company, activeFilter))
-                .filter(company -> normalizedName.isEmpty()
-                        || company.getCompanyName().toLowerCase(Locale.ENGLISH).contains(normalizedName))
-                .filter(company -> normalizedIndustry.isEmpty()
-                        || (company.getIndustry() != null
-                        && company.getIndustry().toLowerCase(Locale.ENGLISH).contains(normalizedIndustry)))
-                .collect(Collectors.toList());
+        // Filtering happens in SQL (parameterized WHERE clauses), not client-side.
+        return companyDAO.searchCompanies(nameKeyword, industryKeyword, activeFilter, driveFilter);
     }
 
     public Company getCompany(int companyId) {
@@ -67,16 +62,4 @@ public class CompanyService {
                 .orElseThrow(() -> new ServiceException("Company not found."));
     }
 
-    private boolean matchesActiveFilter(Company company, String activeFilter) {
-        if (activeFilter == null || activeFilter.isBlank() || "ALL".equalsIgnoreCase(activeFilter)) {
-            return true;
-        }
-        if ("ACTIVE".equalsIgnoreCase(activeFilter)) {
-            return Boolean.TRUE.equals(company.getIsActive());
-        }
-        if ("INACTIVE".equalsIgnoreCase(activeFilter)) {
-            return !Boolean.TRUE.equals(company.getIsActive());
-        }
-        return true;
-    }
 }

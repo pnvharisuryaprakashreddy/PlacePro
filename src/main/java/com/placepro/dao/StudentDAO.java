@@ -21,6 +21,10 @@ public interface StudentDAO {
 
     List<Student> searchByNameOrRollNumber(String keyword);
 
+    List<StudentSearchRow> searchStudents(StudentSearchCriteria criteria, int offset, int limit);
+
+    int countStudents(StudentSearchCriteria criteria);
+
     boolean update(Student student);
 
     boolean deactivate(int studentId);

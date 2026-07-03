@@ -1,6 +1,8 @@
 package com.placepro.dao.impl;
 
 import com.placepro.dao.StudentDAO;
+import com.placepro.dao.StudentSearchCriteria;
+import com.placepro.dao.StudentSearchRow;
 import com.placepro.model.Student;
 
 import java.sql.Connection;
@@ -94,6 +96,90 @@ public class StudentDAOImpl extends AbstractJdbcDAO implements StudentDAO {
             }
         } catch (SQLException exception) {
             throw translateException("student search", exception);
+        }
+    }
+
+    @Override
+    public List<StudentSearchRow> searchStudents(StudentSearchCriteria criteria, int offset, int limit) {
+        StringBuilder sql = new StringBuilder(
+                "SELECT s.*, "
+                        + "(SELECT c.company_name FROM applications a "
+                        + " JOIN placement_drives d ON d.drive_id = a.drive_id "
+                        + " JOIN companies c ON c.company_id = d.company_id "
+                        + " WHERE a.student_id = s.student_id AND a.status = 'SELECTED' LIMIT 1) AS placed_company "
+                        + "FROM students s");
+        List<Object> params = new ArrayList<>();
+        appendSearchConditions(sql, params, criteria);
+        sql.append(" ORDER BY s.roll_number LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            bindParams(statement, params);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<StudentSearchRow> rows = new ArrayList<>();
+                while (resultSet.next()) {
+                    rows.add(new StudentSearchRow(mapRow(resultSet), resultSet.getString("placed_company")));
+                }
+                return rows;
+            }
+        } catch (SQLException exception) {
+            throw translateException("student search", exception);
+        }
+    }
+
+    @Override
+    public int countStudents(StudentSearchCriteria criteria) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM students s");
+        List<Object> params = new ArrayList<>();
+        appendSearchConditions(sql, params, criteria);
+
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql.toString())) {
+            bindParams(statement, params);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                return resultSet.next() ? resultSet.getInt(1) : 0;
+            }
+        } catch (SQLException exception) {
+            throw translateException("student count", exception);
+        }
+    }
+
+    private void appendSearchConditions(StringBuilder sql, List<Object> params, StudentSearchCriteria criteria) {
+        sql.append(" WHERE s.is_active = 1");
+        if (criteria.getName() != null && !criteria.getName().isBlank()) {
+            sql.append(" AND s.full_name LIKE ?");
+            params.add("%" + criteria.getName().trim() + "%");
+        }
+        if (criteria.getRollNumber() != null && !criteria.getRollNumber().isBlank()) {
+            sql.append(" AND s.roll_number LIKE ?");
+            params.add("%" + criteria.getRollNumber().trim() + "%");
+        }
+        if (criteria.getBranch() != null && !criteria.getBranch().isBlank()) {
+            sql.append(" AND s.branch = ?");
+            params.add(criteria.getBranch());
+        }
+        if (criteria.getMinCgpa() != null) {
+            sql.append(" AND s.cgpa >= ?");
+            params.add(criteria.getMinCgpa());
+        }
+        if (criteria.getMaxCgpa() != null) {
+            sql.append(" AND s.cgpa <= ?");
+            params.add(criteria.getMaxCgpa());
+        }
+        if (StudentSearchCriteria.PLACED.equals(criteria.getPlacementStatus())) {
+            sql.append(" AND EXISTS (SELECT 1 FROM applications a"
+                    + " WHERE a.student_id = s.student_id AND a.status = 'SELECTED')");
+        } else if (StudentSearchCriteria.NOT_PLACED.equals(criteria.getPlacementStatus())) {
+            sql.append(" AND NOT EXISTS (SELECT 1 FROM applications a"
+                    + " WHERE a.student_id = s.student_id AND a.status = 'SELECTED')");
+        }
+    }
+
+    private void bindParams(PreparedStatement statement, List<Object> params) throws SQLException {
+        for (int index = 0; index < params.size(); index++) {
+            statement.setObject(index + 1, params.get(index));
         }
     }
 

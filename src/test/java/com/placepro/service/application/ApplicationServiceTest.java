@@ -405,6 +405,12 @@ class ApplicationServiceTest {
         }
 
         @Override
+        public java.util.List<com.placepro.model.Company> searchCompanies(
+                String nameKeyword, String industryKeyword, String activeFilter, String driveFilter) {
+            return new ArrayList<>();
+        }
+
+        @Override
         public java.util.List<com.placepro.model.Company> searchByName(String keyword) {
             return new ArrayList<>();
         }
@@ -454,6 +460,17 @@ class ApplicationServiceTest {
         @Override
         public java.util.List<com.placepro.model.Student> searchByNameOrRollNumber(String keyword) {
             return new ArrayList<>();
+        }
+
+        @Override
+        public java.util.List<com.placepro.dao.StudentSearchRow> searchStudents(
+                com.placepro.dao.StudentSearchCriteria criteria, int offset, int limit) {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public int countStudents(com.placepro.dao.StudentSearchCriteria criteria) {
+            return 0;
         }
 
         @Override
