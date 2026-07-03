@@ -13,6 +13,10 @@ public final class DBConnection {
     private static final String CONFIG_FILE = "config.properties";
     private static final Properties PROPERTIES = loadProperties();
 
+    static {
+        loadDriver();
+    }
+
     private DBConnection() {
     }
 
@@ -62,5 +66,13 @@ public final class DBConnection {
     private static String getPassword() {
         String value = PROPERTIES.getProperty("db.password");
         return Objects.isNull(value) ? "" : value;
+    }
+
+    private static void loadDriver() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException exception) {
+            throw new DatabaseConnectionException("MySQL JDBC driver not found on the classpath.", exception);
+        }
     }
 }
