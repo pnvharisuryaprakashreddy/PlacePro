@@ -8,7 +8,7 @@ import com.placepro.ui.AppContext;
 import com.placepro.ui.admin.AdminDashboardPanel;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.officer.OfficerDashboardPanel;
-import com.placepro.ui.officer.RecruiterDashboardPanel;
+import com.placepro.ui.recruiter.RecruiterDashboardPanel;
 import com.placepro.ui.student.StudentDashboardPanel;
 
 import javax.swing.JButton;

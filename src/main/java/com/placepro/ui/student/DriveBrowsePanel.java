@@ -58,7 +58,7 @@ public class DriveBrowsePanel extends JPanel {
         driveTable.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseClicked(java.awt.event.MouseEvent event) {
-                if (event.getClickCount() >= 1) {
+                if (event.getClickCount() >= 2) {
                     openSelectedDrive();
                 }
             }
@@ -102,14 +102,15 @@ public class DriveBrowsePanel extends JPanel {
     }
 
     private void openSelectedDrive() {
-        int row = driveTable.getSelectedRow();
-        if (row < 0) {
+        int viewRow = driveTable.getSelectedRow();
+        if (viewRow < 0) {
             statusLabel.setText("Select a drive to view details.");
             return;
         }
-        if (row >= driveList.size()) {
+        int modelRow = driveTable.convertRowIndexToModel(viewRow);
+        if (modelRow >= driveList.size()) {
             return;
         }
-        navigator.showDriveDetail(driveList.get(row));
+        navigator.showDriveDetail(driveList.get(modelRow));
     }
 }

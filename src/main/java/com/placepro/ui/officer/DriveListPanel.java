@@ -140,7 +140,7 @@ public class DriveListPanel extends JPanel {
             statusLabel.setText("Select a drive to edit.");
             return;
         }
-        openDriveForm(driveService.getDrive(selected.getDriveId()));
+        openDriveForm(selected);
     }
 
     private PlacementDrive getSelectedDrive() {

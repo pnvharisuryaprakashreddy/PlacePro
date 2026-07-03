@@ -7,6 +7,8 @@ import com.placepro.service.auth.AuthService;
 import com.placepro.service.auth.SessionManager;
 import com.placepro.service.drive.DriveService;
 
+import com.placepro.ui.AppContext;
+
 import javax.swing.JPanel;
 
 public class AdminDashboardPanel extends JPanel {
@@ -25,6 +27,8 @@ public class AdminDashboardPanel extends JPanel {
                 companyService,
                 driveService,
                 userManagementService,
+                AppContext.getApplicationService(),
+                AppContext.getInterviewService(),
                 sessionManager,
                 onLogout), java.awt.BorderLayout.CENTER);
     }

@@ -3,6 +3,7 @@ package com.placepro.ui.login;
 import com.placepro.service.auth.AuthService;
 import com.placepro.service.ServiceException;
 import com.placepro.ui.common.UiStyles;
+import com.placepro.ui.common.UiTasks;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -13,13 +14,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 
-abstract class BaseLoginPanel extends JPanel {
+abstract class BaseLoginPanel<T> extends JPanel {
 
     protected final AuthService authService;
     protected final LoginNavigator navigator;
     protected final JTextField emailField;
     protected final JPasswordField passwordField;
     protected final JLabel errorLabel;
+    private final JButton loginButton;
 
     BaseLoginPanel(String title, AuthService authService, LoginNavigator navigator) {
         this.authService = authService;
@@ -60,7 +62,7 @@ abstract class BaseLoginPanel extends JPanel {
         add(errorLabel, constraints);
 
         constraints.gridy++;
-        JButton loginButton = new JButton("Login");
+        loginButton = new JButton("Login");
         loginButton.addActionListener(event -> attemptLogin());
         add(loginButton, constraints);
 
@@ -83,14 +85,32 @@ abstract class BaseLoginPanel extends JPanel {
             return;
         }
 
-        try {
-            performLogin(email, password);
-        } catch (ServiceException exception) {
-            showError(exception.getMessage());
-        }
+        loginButton.setEnabled(false);
+        UiTasks.run(
+                () -> authenticate(email, password),
+                principal -> {
+                    loginButton.setEnabled(true);
+                    onLoginSuccess(principal);
+                },
+                exception -> {
+                    loginButton.setEnabled(true);
+                    showError(extractMessage(exception));
+                });
     }
 
-    protected abstract void performLogin(String email, String password);
+    /** Runs on a background thread; must not touch Swing components. */
+    protected abstract T authenticate(String email, String password);
+
+    /** Runs on the EDT after a successful login. */
+    protected abstract void onLoginSuccess(T principal);
+
+    private String extractMessage(Exception exception) {
+        Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
+        if (cause instanceof ServiceException && cause.getMessage() != null && !cause.getMessage().isBlank()) {
+            return cause.getMessage();
+        }
+        return "Login failed, please try again.";
+    }
 
     protected void clearError() {
         errorLabel.setText(" ");

@@ -1,21 +1,35 @@
 package com.placepro.service.drive;
 
 import com.placepro.dao.PlacementDriveDAO;
+import com.placepro.dao.StudentDAO;
 import com.placepro.model.PlacementDrive;
+import com.placepro.model.Student;
 import com.placepro.service.AuthorizationHelper;
 import com.placepro.service.ServiceException;
 import com.placepro.service.UserRole;
 import com.placepro.service.auth.SessionManager;
+import com.placepro.service.notification.NotificationService;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class DriveService {
 
     private final PlacementDriveDAO placementDriveDAO;
+    private final StudentDAO studentDAO;
+    private final NotificationService notificationService;
     private final SessionManager sessionManager;
 
-    public DriveService(PlacementDriveDAO placementDriveDAO, SessionManager sessionManager) {
+    public DriveService(PlacementDriveDAO placementDriveDAO,
+                        StudentDAO studentDAO,
+                        NotificationService notificationService,
+                        SessionManager sessionManager) {
         this.placementDriveDAO = placementDriveDAO;
+        this.studentDAO = studentDAO;
+        this.notificationService = notificationService;
         this.sessionManager = sessionManager;
     }
 
@@ -57,7 +71,33 @@ public class DriveService {
     }
 
     public PlacementDrive publishDrive(int driveId) {
-        return transitionDrive(driveId, DriveStatus.DRAFT, DriveStatus.PUBLISHED);
+        PlacementDrive drive = transitionDrive(driveId, DriveStatus.DRAFT, DriveStatus.PUBLISHED);
+        notifyEligibleBranchStudents(drive);
+        return drive;
+    }
+
+    private void notifyEligibleBranchStudents(PlacementDrive drive) {
+        Set<String> allowedBranches = drive.getAllowedBranches() == null
+                ? Set.of()
+                : Arrays.stream(drive.getAllowedBranches().split(","))
+                        .map(branch -> branch.trim().toUpperCase(Locale.ENGLISH))
+                        .filter(branch -> !branch.isEmpty())
+                        .collect(Collectors.toSet());
+        for (Student student : studentDAO.findAllActive()) {
+            String branch = student.getBranch() == null
+                    ? ""
+                    : student.getBranch().trim().toUpperCase(Locale.ENGLISH);
+            if (allowedBranches.isEmpty() || allowedBranches.contains(branch)) {
+                notificationService.notifyStudent(
+                        student.getStudentId(),
+                        "New Placement Drive",
+                        String.format("A new drive for %s has been published. Check your eligibility and apply before %s.",
+                                drive.getJobTitle(),
+                                drive.getApplicationDeadline()),
+                        "DRIVE_PUBLISHED",
+                        drive.getDriveId());
+            }
+        }
     }
 
     public PlacementDrive closeDrive(int driveId) {

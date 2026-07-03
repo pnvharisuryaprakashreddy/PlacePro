@@ -1,6 +1,7 @@
 package com.placepro.service.application;
 
 import com.placepro.dao.ApplicationDAO;
+import com.placepro.dao.CompanyDAO;
 import com.placepro.dao.NotificationDAO;
 import com.placepro.dao.PlacementDriveDAO;
 import com.placepro.dao.ResumeDAO;
@@ -14,6 +15,7 @@ import com.placepro.service.auth.SessionManager;
 import com.placepro.service.drive.DriveStatus;
 import com.placepro.service.drive.EligibilityResult;
 import com.placepro.service.drive.EligibilityService;
+import com.placepro.service.notification.NotificationService;
 import com.placepro.util.TransactionCallback;
 import com.placepro.util.TransactionRunner;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,6 +42,8 @@ class ApplicationServiceTest {
     private SessionManager sessionManager;
     private StubApplicationDAO applicationDAO;
     private StubNotificationDAO notificationDAO;
+    private NotificationService notificationService;
+    private StubStudentDAO studentDAO;
     private StubPlacementDriveDAO placementDriveDAO;
     private StubResumeDAO resumeDAO;
     private StubEligibilityService eligibilityService;
@@ -52,6 +56,8 @@ class ApplicationServiceTest {
 
         applicationDAO = new StubApplicationDAO();
         notificationDAO = new StubNotificationDAO();
+        notificationService = new NotificationService(notificationDAO, sessionManager);
+        studentDAO = new StubStudentDAO();
         placementDriveDAO = new StubPlacementDriveDAO();
         resumeDAO = new StubResumeDAO();
         eligibilityService = new StubEligibilityService();
@@ -61,9 +67,11 @@ class ApplicationServiceTest {
 
         applicationService = new ApplicationService(
                 applicationDAO,
-                notificationDAO,
+                notificationService,
                 placementDriveDAO,
+                new StubCompanyDAO(),
                 resumeDAO,
+                studentDAO,
                 eligibilityService,
                 sessionManager,
                 new TransactionRunner() {
@@ -121,6 +129,7 @@ class ApplicationServiceTest {
     private PlacementDrive drive(int id, String title) {
         PlacementDrive drive = new PlacementDrive();
         drive.setDriveId(id);
+        drive.setCompanyId(1);
         drive.setJobTitle(title);
         drive.setMinCgpa(new BigDecimal("7.00"));
         drive.setMaxBacklogs(0);
@@ -362,6 +371,108 @@ class ApplicationServiceTest {
 
         @Override
         public boolean deleteById(int resumeId) {
+            return false;
+        }
+    }
+
+    private static final class StubCompanyDAO implements CompanyDAO {
+        @Override
+        public com.placepro.model.Company insert(com.placepro.model.Company company) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Optional<com.placepro.model.Company> findById(int companyId) {
+            com.placepro.model.Company company = new com.placepro.model.Company();
+            company.setCompanyId(companyId);
+            company.setCompanyName("Test Company");
+            return Optional.of(company);
+        }
+
+        @Override
+        public Optional<com.placepro.model.Company> findByCompanyName(String companyName) {
+            return Optional.empty();
+        }
+
+        @Override
+        public java.util.List<com.placepro.model.Company> findAllActive() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public java.util.List<com.placepro.model.Company> findAll() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public java.util.List<com.placepro.model.Company> searchByName(String keyword) {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public boolean update(com.placepro.model.Company company) {
+            return false;
+        }
+
+        @Override
+        public boolean deactivate(int companyId) {
+            return false;
+        }
+
+        @Override
+        public boolean deleteById(int companyId) {
+            return false;
+        }
+    }
+
+    private static final class StubStudentDAO implements com.placepro.dao.StudentDAO {
+        @Override
+        public com.placepro.model.Student insert(com.placepro.model.Student student) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Optional<com.placepro.model.Student> findById(int studentId) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<com.placepro.model.Student> findByEmail(String email) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<com.placepro.model.Student> findByRollNumber(String rollNumber) {
+            return Optional.empty();
+        }
+
+        @Override
+        public java.util.List<com.placepro.model.Student> findAll() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public java.util.List<com.placepro.model.Student> searchByNameOrRollNumber(String keyword) {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public java.util.List<com.placepro.model.Student> findAllActive() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public boolean update(com.placepro.model.Student student) {
+            return false;
+        }
+
+        @Override
+        public boolean deactivate(int studentId) {
+            return false;
+        }
+
+        @Override
+        public boolean deleteById(int studentId) {
             return false;
         }
     }

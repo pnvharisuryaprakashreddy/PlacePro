@@ -4,6 +4,7 @@ import com.placepro.model.Company;
 import com.placepro.service.CompanyService;
 import com.placepro.service.ServiceException;
 import com.placepro.ui.common.UiStyles;
+import com.placepro.ui.common.UiTasks;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -87,25 +88,27 @@ public class CompanyFormPanel extends JPanel {
 
     private void saveCompany() {
         errorLabel.setText(" ");
-        try {
-            Company company = existingCompany == null ? new Company() : existingCompany;
-            company.setCompanyName(nameField.getText().trim());
-            company.setIndustry(industryField.getText().trim());
-            company.setContactPerson(contactPersonField.getText().trim());
-            company.setEmail(emailField.getText().trim());
-            company.setPhone(phoneField.getText().trim());
-            company.setWebsite(websiteField.getText().trim());
-            company.setAddress(addressField.getText().trim());
-            if (company.getIsActive() == null) {
-                company.setIsActive(true);
-            }
-
-            Company saved = existingCompany == null
-                    ? companyService.createCompany(company)
-                    : companyService.updateCompany(company);
-            onSaved.accept(saved);
-        } catch (ServiceException exception) {
-            errorLabel.setText(exception.getMessage());
+        Company company = existingCompany == null ? new Company() : existingCompany;
+        company.setCompanyName(nameField.getText().trim());
+        company.setIndustry(industryField.getText().trim());
+        company.setContactPerson(contactPersonField.getText().trim());
+        company.setEmail(emailField.getText().trim());
+        company.setPhone(phoneField.getText().trim());
+        company.setWebsite(websiteField.getText().trim());
+        company.setAddress(addressField.getText().trim());
+        if (company.getIsActive() == null) {
+            company.setIsActive(true);
         }
+
+        boolean isNew = existingCompany == null;
+        UiTasks.run(
+                () -> isNew ? companyService.createCompany(company) : companyService.updateCompany(company),
+                onSaved::accept,
+                exception -> {
+                    Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
+                    errorLabel.setText(cause instanceof ServiceException && cause.getMessage() != null
+                            ? cause.getMessage()
+                            : "Could not save the company, please try again.");
+                });
     }
 }

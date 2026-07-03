@@ -228,16 +228,16 @@ public class DriveFormPanel extends JPanel {
             drive.setVisitDate(parseDate(visitDateField.getText().trim()));
             drive.setApplicationDeadline(parseDateTime(deadlineField.getText().trim()));
 
-            if (existingDrive == null) {
+            boolean isNew = existingDrive == null;
+            if (isNew) {
                 drive.setStatus(DriveStatus.DRAFT.name());
                 drive.setCreatedBy(sessionManager.getCurrentUserId()
                         .orElseThrow(() -> new ServiceException("Session expired.")));
-                PlacementDrive saved = driveService.createDrive(drive);
-                onSaved.accept(saved);
-            } else {
-                PlacementDrive saved = driveService.updateDrive(drive);
-                onSaved.accept(saved);
             }
+            UiTasks.run(
+                    () -> isNew ? driveService.createDrive(drive) : driveService.updateDrive(drive),
+                    onSaved::accept,
+                    exception -> errorLabel.setText(extractMessage(exception, "Could not save the drive.")));
         } catch (ServiceException | NumberFormatException | DateTimeParseException exception) {
             errorLabel.setText(exception.getMessage());
         }
@@ -248,13 +248,19 @@ public class DriveFormPanel extends JPanel {
             errorLabel.setText("Save the drive before changing lifecycle status.");
             return;
         }
-        try {
-            PlacementDrive updated = transitionFunction.apply(existingDrive.getDriveId());
-            updateLifecycleButtons(updated.getStatus());
-            onSaved.accept(updated);
-        } catch (ServiceException exception) {
-            errorLabel.setText(exception.getMessage());
-        }
+        int driveId = existingDrive.getDriveId();
+        UiTasks.run(
+                () -> transitionFunction.apply(driveId),
+                updated -> {
+                    updateLifecycleButtons(updated.getStatus());
+                    onSaved.accept(updated);
+                },
+                exception -> errorLabel.setText(extractMessage(exception, "Could not update the drive status.")));
+    }
+
+    private String extractMessage(Exception exception, String fallback) {
+        Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
+        return cause instanceof ServiceException && cause.getMessage() != null ? cause.getMessage() : fallback;
     }
 
     private void updateLifecycleButtons(String status) {

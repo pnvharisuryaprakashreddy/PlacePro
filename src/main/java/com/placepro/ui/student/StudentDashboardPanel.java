@@ -16,6 +16,7 @@ public class StudentDashboardPanel extends JPanel {
                 authService,
                 AppContext.getDashboardService(),
                 AppContext.getApplicationService(),
+                AppContext.getApplicationTrackingService(),
                 AppContext.getEligibilityService(),
                 AppContext.getResumeService(),
                 onLogout), BorderLayout.CENTER);

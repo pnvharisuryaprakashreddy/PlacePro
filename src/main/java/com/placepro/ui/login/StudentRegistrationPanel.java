@@ -4,6 +4,7 @@ import com.placepro.model.Student;
 import com.placepro.service.ServiceException;
 import com.placepro.service.auth.AuthService;
 import com.placepro.ui.common.UiStyles;
+import com.placepro.ui.common.UiTasks;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -161,23 +162,28 @@ public class StudentRegistrationPanel extends JPanel {
             return;
         }
 
-        try {
-            Student student = new Student();
-            student.setFullName(name);
-            student.setRollNumber(rollNumber);
-            student.setBranch(branch);
-            student.setCgpa(cgpa);
-            student.setEmail(email);
-            student.setPhone(phone);
-            student.setBacklogCount(0);
-            student.setGraduationYear(Year.now().getValue() + 1);
-            student.setIsActive(true);
+        Student student = new Student();
+        student.setFullName(name);
+        student.setRollNumber(rollNumber);
+        student.setBranch(branch);
+        student.setCgpa(cgpa);
+        student.setEmail(email);
+        student.setPhone(phone);
+        student.setBacklogCount(0);
+        student.setGraduationYear(Year.now().getValue() + 1);
+        student.setIsActive(true);
 
-            Student registeredStudent = authService.registerStudent(student, password);
-            navigator.showStudentDashboard(registeredStudent);
-        } catch (ServiceException exception) {
-            generalErrorLabel.setText(exception.getMessage());
-        }
+        UiTasks.run(
+                () -> authService.registerStudent(student, password),
+                registeredStudent -> navigator.showStudentDashboard(registeredStudent),
+                exception -> {
+                    Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
+                    if (cause instanceof ServiceException && cause.getMessage() != null) {
+                        generalErrorLabel.setText(cause.getMessage());
+                    } else {
+                        generalErrorLabel.setText("Registration failed, please try again.");
+                    }
+                });
     }
 
     private boolean requireNonEmpty(String key, String value, String message) {

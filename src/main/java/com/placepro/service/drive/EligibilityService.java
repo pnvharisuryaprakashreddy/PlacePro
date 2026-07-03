@@ -6,6 +6,7 @@ import com.placepro.model.PlacementDrive;
 import com.placepro.model.Student;
 import com.placepro.service.ServiceException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -30,7 +31,9 @@ public class EligibilityService {
 
         List<String> reasons = new ArrayList<>();
 
-        if (student.getCgpa().compareTo(drive.getMinCgpa()) < 0) {
+        if (student.getCgpa() == null) {
+            reasons.add("Your profile has no CGPA recorded. Please update your profile.");
+        } else if (student.getCgpa().compareTo(drive.getMinCgpa()) < 0) {
             reasons.add(String.format(
                     Locale.ENGLISH,
                     "CGPA %.2f is below the required minimum of %.2f.",
@@ -55,6 +58,11 @@ public class EligibilityService {
 
         if (!DriveStatus.PUBLISHED.name().equals(drive.getStatus())) {
             reasons.add("This drive is not open for applications.");
+        }
+
+        if (drive.getApplicationDeadline() != null
+                && drive.getApplicationDeadline().isBefore(LocalDateTime.now())) {
+            reasons.add("The application deadline for this drive has passed.");
         }
 
         return reasons.isEmpty() ? EligibilityResult.eligible() : EligibilityResult.ineligible(reasons);

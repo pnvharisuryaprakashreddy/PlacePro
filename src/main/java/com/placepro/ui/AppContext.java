@@ -2,6 +2,7 @@ package com.placepro.ui;
 
 import com.placepro.dao.impl.ApplicationDAOImpl;
 import com.placepro.dao.impl.CompanyDAOImpl;
+import com.placepro.dao.impl.InterviewScheduleDAOImpl;
 import com.placepro.dao.impl.NotificationDAOImpl;
 import com.placepro.dao.impl.PlacementDriveDAOImpl;
 import com.placepro.dao.impl.PlacementOfficerDAOImpl;
@@ -12,10 +13,14 @@ import com.placepro.service.CompanyService;
 import com.placepro.service.ResumeService;
 import com.placepro.service.admin.UserManagementService;
 import com.placepro.service.application.ApplicationService;
+import com.placepro.service.application.InterviewService;
 import com.placepro.service.auth.AuthService;
 import com.placepro.service.auth.SessionManager;
 import com.placepro.service.drive.DriveService;
 import com.placepro.service.drive.EligibilityService;
+import com.placepro.service.notification.NotificationService;
+import com.placepro.service.recruiter.RecruiterService;
+import com.placepro.service.student.ApplicationTrackingService;
 import com.placepro.service.student.DashboardService;
 
 public final class AppContext {
@@ -29,6 +34,7 @@ public final class AppContext {
     private static final ApplicationDAOImpl APPLICATION_DAO = new ApplicationDAOImpl();
     private static final NotificationDAOImpl NOTIFICATION_DAO = new NotificationDAOImpl();
     private static final ResumeDAOImpl RESUME_DAO = new ResumeDAOImpl();
+    private static final InterviewScheduleDAOImpl INTERVIEW_SCHEDULE_DAO = new InterviewScheduleDAOImpl();
 
     private static final AuthService AUTH_SERVICE = new AuthService(
             STUDENT_DAO,
@@ -36,21 +42,52 @@ public final class AppContext {
             RECRUITER_DAO,
             SESSION_MANAGER);
 
+    private static final NotificationService NOTIFICATION_SERVICE = new NotificationService(
+            NOTIFICATION_DAO,
+            SESSION_MANAGER);
     private static final CompanyService COMPANY_SERVICE = new CompanyService(COMPANY_DAO, SESSION_MANAGER);
-    private static final DriveService DRIVE_SERVICE = new DriveService(PLACEMENT_DRIVE_DAO, SESSION_MANAGER);
+    private static final DriveService DRIVE_SERVICE = new DriveService(
+            PLACEMENT_DRIVE_DAO,
+            STUDENT_DAO,
+            NOTIFICATION_SERVICE,
+            SESSION_MANAGER);
     private static final EligibilityService ELIGIBILITY_SERVICE = new EligibilityService(STUDENT_DAO, PLACEMENT_DRIVE_DAO);
     private static final ApplicationService APPLICATION_SERVICE = new ApplicationService(
             APPLICATION_DAO,
-            NOTIFICATION_DAO,
+            NOTIFICATION_SERVICE,
             PLACEMENT_DRIVE_DAO,
+            COMPANY_DAO,
             RESUME_DAO,
+            STUDENT_DAO,
             ELIGIBILITY_SERVICE,
+            SESSION_MANAGER);
+    private static final InterviewService INTERVIEW_SERVICE = new InterviewService(
+            INTERVIEW_SCHEDULE_DAO,
+            APPLICATION_DAO,
+            PLACEMENT_DRIVE_DAO,
+            RECRUITER_DAO,
+            NOTIFICATION_SERVICE,
             SESSION_MANAGER);
     private static final ResumeService RESUME_SERVICE = new ResumeService(RESUME_DAO, SESSION_MANAGER);
     private static final DashboardService DASHBOARD_SERVICE = new DashboardService(
             APPLICATION_DAO,
             PLACEMENT_DRIVE_DAO,
             COMPANY_DAO,
+            SESSION_MANAGER);
+    private static final ApplicationTrackingService APPLICATION_TRACKING_SERVICE = new ApplicationTrackingService(
+            APPLICATION_DAO,
+            PLACEMENT_DRIVE_DAO,
+            COMPANY_DAO,
+            INTERVIEW_SCHEDULE_DAO,
+            SESSION_MANAGER);
+    private static final RecruiterService RECRUITER_SERVICE = new RecruiterService(
+            RECRUITER_DAO,
+            PLACEMENT_DRIVE_DAO,
+            COMPANY_DAO,
+            APPLICATION_DAO,
+            STUDENT_DAO,
+            RESUME_DAO,
+            INTERVIEW_SCHEDULE_DAO,
             SESSION_MANAGER);
     private static final UserManagementService USER_MANAGEMENT_SERVICE = new UserManagementService(
             STUDENT_DAO,
@@ -86,12 +123,28 @@ public final class AppContext {
         return APPLICATION_SERVICE;
     }
 
+    public static InterviewService getInterviewService() {
+        return INTERVIEW_SERVICE;
+    }
+
+    public static NotificationService getNotificationService() {
+        return NOTIFICATION_SERVICE;
+    }
+
     public static ResumeService getResumeService() {
         return RESUME_SERVICE;
     }
 
     public static DashboardService getDashboardService() {
         return DASHBOARD_SERVICE;
+    }
+
+    public static ApplicationTrackingService getApplicationTrackingService() {
+        return APPLICATION_TRACKING_SERVICE;
+    }
+
+    public static RecruiterService getRecruiterService() {
+        return RECRUITER_SERVICE;
     }
 
     public static UserManagementService getUserManagementService() {

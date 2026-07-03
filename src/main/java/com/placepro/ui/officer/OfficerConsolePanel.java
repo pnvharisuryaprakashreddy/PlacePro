@@ -2,6 +2,8 @@ package com.placepro.ui.officer;
 
 import com.placepro.model.PlacementOfficer;
 import com.placepro.service.CompanyService;
+import com.placepro.service.application.ApplicationService;
+import com.placepro.service.application.InterviewService;
 import com.placepro.service.auth.AuthService;
 import com.placepro.service.auth.SessionManager;
 import com.placepro.service.drive.DriveService;
@@ -20,6 +22,8 @@ public class OfficerConsolePanel extends JPanel {
                                AuthService authService,
                                CompanyService companyService,
                                DriveService driveService,
+                               ApplicationService applicationService,
+                               InterviewService interviewService,
                                SessionManager sessionManager,
                                Runnable onLogout) {
         setLayout(new BorderLayout(8, 8));
@@ -34,7 +38,8 @@ public class OfficerConsolePanel extends JPanel {
         JTabbedPane tabs = new JTabbedPane();
         tabs.addTab("Companies", new CompanyListPanel(companyService));
         tabs.addTab("Drives", new DriveListPanel(driveService, companyService, sessionManager));
-        tabs.addTab("Applications", new PlaceholderPanel("Application review will be available in a later release."));
+        tabs.addTab("Applications", new OfficerApplicationsPanel(
+                officer, driveService, applicationService, interviewService));
         tabs.addTab("Reports", new PlaceholderPanel("Placement reports will be available in a later release."));
         add(tabs, BorderLayout.CENTER);
     }

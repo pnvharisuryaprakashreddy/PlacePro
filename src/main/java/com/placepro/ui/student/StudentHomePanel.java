@@ -30,8 +30,10 @@ public class StudentHomePanel extends JPanel {
     private final JLabel upcomingDeadlinesValue = new JLabel("-");
     private final JLabel appliedValue = new JLabel("-");
     private final JLabel shortlistedValue = new JLabel("-");
+    private final JLabel interviewsValue = new JLabel("-");
     private final JLabel selectedValue = new JLabel("-");
     private final JLabel statusLabel = new JLabel("Loading dashboard...");
+    private final java.util.List<StudentDriveSummary> recentDrives = new java.util.ArrayList<>();
     private final DefaultTableModel recentDrivesModel = new DefaultTableModel(
             new String[]{"Company", "Job Title", "Deadline"}, 0) {
         @Override
@@ -73,11 +75,19 @@ public class StudentHomePanel extends JPanel {
         cards.add(createCard("Upcoming Deadlines", upcomingDeadlinesValue));
         cards.add(createCard("Applied", appliedValue));
         cards.add(createCard("Shortlisted", shortlistedValue));
+        cards.add(createCard("Interviews", interviewsValue));
         cards.add(createCard("Selected", selectedValue));
-        cards.add(createCard("Status", statusLabel));
         center.add(cards, BorderLayout.NORTH);
 
         recentDrivesTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        recentDrivesTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseClicked(java.awt.event.MouseEvent event) {
+                if (event.getClickCount() >= 2) {
+                    openSelectedRecentDrive();
+                }
+            }
+        });
         center.add(new JScrollPane(recentDrivesTable), BorderLayout.CENTER);
 
         JPanel quickNav = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -90,6 +100,7 @@ public class StudentHomePanel extends JPanel {
         quickNav.add(browseButton);
         quickNav.add(applicationsButton);
         quickNav.add(profileButton);
+        quickNav.add(statusLabel);
         center.add(quickNav, BorderLayout.SOUTH);
 
         add(center, BorderLayout.CENTER);
@@ -119,9 +130,12 @@ public class StudentHomePanel extends JPanel {
         Map<String, Integer> counts = summary.getApplicationCountsByStatus();
         appliedValue.setText(String.valueOf(counts.getOrDefault("APPLIED", 0)));
         shortlistedValue.setText(String.valueOf(counts.getOrDefault("SHORTLISTED", 0)));
+        interviewsValue.setText(String.valueOf(counts.getOrDefault("INTERVIEW_SCHEDULED", 0)));
         selectedValue.setText(String.valueOf(counts.getOrDefault("SELECTED", 0)));
-        statusLabel.setText("Dashboard ready");
+        statusLabel.setText(" ");
 
+        recentDrives.clear();
+        recentDrives.addAll(summary.getRecentPublishedDrives());
         recentDrivesModel.setRowCount(0);
         for (StudentDriveSummary driveSummary : summary.getRecentPublishedDrives()) {
             recentDrivesModel.addRow(new Object[]{
@@ -129,6 +143,17 @@ public class StudentHomePanel extends JPanel {
                     driveSummary.getJobTitle(),
                     driveSummary.getApplicationDeadline()
             });
+        }
+    }
+
+    private void openSelectedRecentDrive() {
+        int viewRow = recentDrivesTable.getSelectedRow();
+        if (viewRow < 0) {
+            return;
+        }
+        int modelRow = recentDrivesTable.convertRowIndexToModel(viewRow);
+        if (modelRow < recentDrives.size()) {
+            navigator.showDriveDetail(recentDrives.get(modelRow));
         }
     }
 }

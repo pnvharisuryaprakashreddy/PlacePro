@@ -20,6 +20,10 @@ public class InterviewScheduleDAOImpl extends AbstractJdbcDAO implements Intervi
     private static final String FIND_BY_ID_SQL = "SELECT * FROM interview_schedule WHERE interview_id = ?";
     private static final String FIND_BY_APP_AND_ROUND_SQL = "SELECT * FROM interview_schedule WHERE application_id = ? AND round_number = ?";
     private static final String FIND_BY_APPLICATION_SQL = "SELECT * FROM interview_schedule WHERE application_id = ? ORDER BY round_number";
+    private static final String FIND_BY_COMPANY_SQL = "SELECT i.* FROM interview_schedule i "
+            + "INNER JOIN applications a ON a.application_id = i.application_id "
+            + "INNER JOIN placement_drives d ON d.drive_id = a.drive_id "
+            + "WHERE d.company_id = ? ORDER BY i.scheduled_date, i.scheduled_time, i.round_number";
     private static final String UPDATE_SQL = "UPDATE interview_schedule SET application_id = ?, round_number = ?, round_type = ?, "
             + "scheduled_date = ?, scheduled_time = ?, venue = ?, outcome = ?, notes = ?, created_by_officer_id = ?, "
             + "created_by_recruiter_id = ? WHERE interview_id = ?";
@@ -27,8 +31,16 @@ public class InterviewScheduleDAOImpl extends AbstractJdbcDAO implements Intervi
 
     @Override
     public InterviewSchedule insert(InterviewSchedule interviewSchedule) {
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = getConnection()) {
+            return insert(connection, interviewSchedule);
+        } catch (SQLException exception) {
+            throw translateException("interview schedule insert", exception);
+        }
+    }
+
+    @Override
+    public InterviewSchedule insert(Connection connection, InterviewSchedule interviewSchedule) {
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             bind(statement, interviewSchedule);
             statement.executeUpdate();
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -87,9 +99,34 @@ public class InterviewScheduleDAOImpl extends AbstractJdbcDAO implements Intervi
     }
 
     @Override
-    public boolean update(InterviewSchedule interviewSchedule) {
+    public List<InterviewSchedule> findByCompanyId(int companyId) {
         try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {
+             PreparedStatement statement = connection.prepareStatement(FIND_BY_COMPANY_SQL)) {
+            statement.setInt(1, companyId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                List<InterviewSchedule> schedules = new ArrayList<>();
+                while (resultSet.next()) {
+                    schedules.add(mapRow(resultSet));
+                }
+                return schedules;
+            }
+        } catch (SQLException exception) {
+            throw translateException("interview schedule list by company", exception);
+        }
+    }
+
+    @Override
+    public boolean update(InterviewSchedule interviewSchedule) {
+        try (Connection connection = getConnection()) {
+            return update(connection, interviewSchedule);
+        } catch (SQLException exception) {
+            throw translateException("interview schedule update", exception);
+        }
+    }
+
+    @Override
+    public boolean update(Connection connection, InterviewSchedule interviewSchedule) {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {
             bind(statement, interviewSchedule);
             statement.setInt(11, interviewSchedule.getInterviewId());
             return statement.executeUpdate() > 0;

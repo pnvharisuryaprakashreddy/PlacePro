@@ -7,6 +7,7 @@ import com.placepro.service.ServiceException;
 import com.placepro.service.UserRole;
 import com.placepro.service.auth.SessionManager;
 
+import java.sql.Connection;
 import java.util.List;
 
 public class NotificationService {
@@ -26,6 +27,40 @@ public class NotificationService {
             notification.setIsRead(false);
         }
         return notificationDAO.insert(notification);
+    }
+
+    public Notification notifyStudent(int studentId,
+                                      String title,
+                                      String message,
+                                      String notificationType,
+                                      Integer referenceId) {
+        return notificationDAO.insert(buildStudentNotification(
+                studentId, title, message, notificationType, referenceId));
+    }
+
+    public Notification notifyStudent(Connection connection,
+                                      int studentId,
+                                      String title,
+                                      String message,
+                                      String notificationType,
+                                      Integer referenceId) {
+        return notificationDAO.insert(connection, buildStudentNotification(
+                studentId, title, message, notificationType, referenceId));
+    }
+
+    private Notification buildStudentNotification(int studentId,
+                                                  String title,
+                                                  String message,
+                                                  String notificationType,
+                                                  Integer referenceId) {
+        Notification notification = new Notification();
+        notification.setStudentId(studentId);
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setNotificationType(notificationType);
+        notification.setReferenceId(referenceId);
+        notification.setIsRead(false);
+        return notification;
     }
 
     public List<Notification> getNotificationsForCurrentUser() {

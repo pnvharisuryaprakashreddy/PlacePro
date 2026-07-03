@@ -37,6 +37,7 @@ public class CompanyListPanel extends JPanel {
         }
     };
     private final JTable companyTable = new JTable(tableModel);
+    private List<Company> loadedCompanies = List.of();
 
     public CompanyListPanel(CompanyService companyService) {
         this.companyService = companyService;
@@ -89,6 +90,7 @@ public class CompanyListPanel extends JPanel {
     }
 
     private void populateTable(List<Company> companies) {
+        loadedCompanies = companies;
         tableModel.setRowCount(0);
         for (Company company : companies) {
             tableModel.addRow(new Object[]{
@@ -153,7 +155,10 @@ public class CompanyListPanel extends JPanel {
             return null;
         }
         int companyId = (Integer) tableModel.getValueAt(selectedRow, 0);
-        return companyService.getCompany(companyId);
+        return loadedCompanies.stream()
+                .filter(company -> company.getCompanyId() == companyId)
+                .findFirst()
+                .orElse(null);
     }
 
     private void showError(Exception exception) {

@@ -5,6 +5,7 @@ import com.placepro.service.ResumeService;
 import com.placepro.service.application.ApplicationService;
 import com.placepro.service.auth.AuthService;
 import com.placepro.service.drive.EligibilityService;
+import com.placepro.service.student.ApplicationTrackingService;
 import com.placepro.service.student.DashboardService;
 import com.placepro.service.student.StudentDriveSummary;
 
@@ -23,7 +24,7 @@ public class StudentConsolePanel extends JPanel implements StudentNavigator {
     private final JPanel contentPanel = new JPanel(cardLayout);
     private final StudentHomePanel dashboardPanel;
     private final DriveBrowsePanel browsePanel;
-    private final MyApplicationsPanel applicationsPanel;
+    private final ApplicationTrackingPanel applicationsPanel;
     private final ResumeUploadPanel resumePanel;
     private final DriveDetailPanel driveDetailPanel;
 
@@ -31,13 +32,14 @@ public class StudentConsolePanel extends JPanel implements StudentNavigator {
                                AuthService authService,
                                DashboardService dashboardService,
                                ApplicationService applicationService,
+                               ApplicationTrackingService applicationTrackingService,
                                EligibilityService eligibilityService,
                                ResumeService resumeService,
                                Runnable onLogout) {
         setLayout(new java.awt.BorderLayout());
         dashboardPanel = new StudentHomePanel(student, this, authService, dashboardService, onLogout);
         browsePanel = new DriveBrowsePanel(student, this, dashboardService);
-        applicationsPanel = new MyApplicationsPanel(student, this, applicationService, dashboardService);
+        applicationsPanel = new ApplicationTrackingPanel(student, this, applicationTrackingService);
         resumePanel = new ResumeUploadPanel(student, resumeService, this);
         driveDetailPanel = new DriveDetailPanel(student, this, eligibilityService, applicationService);
 
