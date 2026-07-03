@@ -5,7 +5,9 @@ import com.placepro.service.auth.AuthService;
 import com.placepro.service.student.DashboardService;
 import com.placepro.service.student.StudentDashboardSummary;
 import com.placepro.service.student.StudentDriveSummary;
+import com.placepro.ui.AppContext;
 import com.placepro.ui.common.LogoutButton;
+import com.placepro.ui.common.NotificationBellComponent;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.common.UiTasks;
 
@@ -65,7 +67,10 @@ public class StudentHomePanel extends JPanel {
         JLabel welcomeLabel = new JLabel("Welcome, " + student.getFullName());
         welcomeLabel.setFont(UiStyles.TITLE_FONT);
         header.add(welcomeLabel, BorderLayout.WEST);
-        header.add(new LogoutButton(authService, onLogout), BorderLayout.EAST);
+        JPanel headerActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        headerActions.add(new NotificationBellComponent(AppContext.getNotificationService()));
+        headerActions.add(new LogoutButton(authService, onLogout));
+        header.add(headerActions, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
         JPanel center = new JPanel(new BorderLayout(12, 12));

@@ -97,6 +97,44 @@ public class NotificationService {
                 .count();
     }
 
+    public Notification markAsRead(int notificationId) {
+        Notification notification = notificationDAO.findById(notificationId)
+                .orElseThrow(() -> new ServiceException("Notification not found."));
+        verifyBelongsToCurrentUser(notification);
+        if (Boolean.TRUE.equals(notification.getIsRead())) {
+            return notification;
+        }
+        notification.setIsRead(true);
+        notificationDAO.update(notification);
+        return notification;
+    }
+
+    private void verifyBelongsToCurrentUser(Notification notification) {
+        UserRole role = sessionManager.getCurrentRole()
+                .orElseThrow(() -> new ServiceException("You must be logged in."));
+        int userId = sessionManager.getCurrentUserId()
+                .orElseThrow(() -> new ServiceException("You must be logged in."));
+
+        Integer recipientId;
+        switch (role) {
+            case STUDENT:
+                recipientId = notification.getStudentId();
+                break;
+            case OFFICER:
+            case ADMIN:
+                recipientId = notification.getOfficerId();
+                break;
+            case RECRUITER:
+                recipientId = notification.getRecruiterId();
+                break;
+            default:
+                throw new ServiceException("Unsupported user role for notifications.");
+        }
+        if (recipientId == null || recipientId != userId) {
+            throw new ServiceException("You are not authorized to modify this notification.");
+        }
+    }
+
     private void validateRecipient(Notification notification) {
         int recipientCount = 0;
         if (notification.getStudentId() != null) {

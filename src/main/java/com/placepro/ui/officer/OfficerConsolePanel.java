@@ -7,7 +7,9 @@ import com.placepro.service.application.InterviewService;
 import com.placepro.service.auth.AuthService;
 import com.placepro.service.auth.SessionManager;
 import com.placepro.service.drive.DriveService;
+import com.placepro.ui.AppContext;
 import com.placepro.ui.common.LogoutButton;
+import com.placepro.ui.common.NotificationBellComponent;
 import com.placepro.ui.common.PlaceholderPanel;
 import com.placepro.ui.common.UiStyles;
 
@@ -15,6 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
 public class OfficerConsolePanel extends JPanel {
 
@@ -32,7 +35,10 @@ public class OfficerConsolePanel extends JPanel {
         JLabel welcomeLabel = new JLabel("Welcome, " + officer.getFullName() + ", role: OFFICER");
         welcomeLabel.setFont(UiStyles.TITLE_FONT);
         header.add(welcomeLabel, BorderLayout.WEST);
-        header.add(new LogoutButton(authService, onLogout), BorderLayout.EAST);
+        JPanel headerActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        headerActions.add(new NotificationBellComponent(AppContext.getNotificationService()));
+        headerActions.add(new LogoutButton(authService, onLogout));
+        header.add(headerActions, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
         JTabbedPane tabs = new JTabbedPane();

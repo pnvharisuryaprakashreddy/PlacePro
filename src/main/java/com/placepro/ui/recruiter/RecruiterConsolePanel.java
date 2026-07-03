@@ -4,13 +4,16 @@ import com.placepro.model.Recruiter;
 import com.placepro.service.application.InterviewService;
 import com.placepro.service.auth.AuthService;
 import com.placepro.service.recruiter.RecruiterService;
+import com.placepro.ui.AppContext;
 import com.placepro.ui.common.LogoutButton;
+import com.placepro.ui.common.NotificationBellComponent;
 import com.placepro.ui.common.UiStyles;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
 public class RecruiterConsolePanel extends JPanel {
 
@@ -25,7 +28,10 @@ public class RecruiterConsolePanel extends JPanel {
         JLabel welcomeLabel = new JLabel("Welcome, " + recruiter.getFullName() + ", role: RECRUITER");
         welcomeLabel.setFont(UiStyles.TITLE_FONT);
         header.add(welcomeLabel, BorderLayout.WEST);
-        header.add(new LogoutButton(authService, onLogout), BorderLayout.EAST);
+        JPanel headerActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
+        headerActions.add(new NotificationBellComponent(AppContext.getNotificationService()));
+        headerActions.add(new LogoutButton(authService, onLogout));
+        header.add(headerActions, BorderLayout.EAST);
         add(header, BorderLayout.NORTH);
 
         JTabbedPane tabs = new JTabbedPane();
