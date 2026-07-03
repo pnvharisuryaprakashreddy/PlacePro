@@ -15,6 +15,8 @@ public interface CompanyDAO {
 
     List<Company> findAllActive();
 
+    List<Company> findAll();
+
     List<Company> searchByName(String keyword);
 
     boolean update(Company company);

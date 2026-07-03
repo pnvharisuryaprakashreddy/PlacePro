@@ -17,6 +17,8 @@ public interface PlacementDriveDAO {
 
     List<PlacementDrive> findPublishedDrives();
 
+    List<PlacementDrive> findAll();
+
     boolean update(PlacementDrive drive);
 
     boolean deleteById(int driveId);

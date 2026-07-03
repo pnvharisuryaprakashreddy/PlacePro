@@ -7,6 +7,8 @@ import com.placepro.service.ServiceException;
 import com.placepro.service.UserRole;
 import com.placepro.service.auth.SessionManager;
 
+import java.util.List;
+
 public class DriveService {
 
     private final PlacementDriveDAO placementDriveDAO;
@@ -27,6 +29,31 @@ public class DriveService {
             throw new ServiceException("New drives must be created in Draft status.");
         }
         return placementDriveDAO.insert(drive);
+    }
+
+    public PlacementDrive updateDrive(PlacementDrive drive) {
+        AuthorizationHelper.requireRole(sessionManager, UserRole.OFFICER, UserRole.ADMIN);
+
+        PlacementDrive existing = placementDriveDAO.findById(drive.getDriveId())
+                .orElseThrow(() -> new ServiceException("Placement drive not found."));
+        drive.setStatus(existing.getStatus());
+        drive.setCreatedBy(existing.getCreatedBy());
+        placementDriveDAO.update(drive);
+        return drive;
+    }
+
+    public PlacementDrive getDrive(int driveId) {
+        AuthorizationHelper.requireRole(sessionManager, UserRole.OFFICER, UserRole.ADMIN);
+        return placementDriveDAO.findById(driveId)
+                .orElseThrow(() -> new ServiceException("Placement drive not found."));
+    }
+
+    public List<PlacementDrive> listDrives(String statusFilter) {
+        AuthorizationHelper.requireRole(sessionManager, UserRole.OFFICER, UserRole.ADMIN);
+        if (statusFilter == null || statusFilter.isBlank() || "ALL".equalsIgnoreCase(statusFilter)) {
+            return placementDriveDAO.findAll();
+        }
+        return placementDriveDAO.findByStatus(statusFilter.toUpperCase());
     }
 
     public PlacementDrive publishDrive(int driveId) {

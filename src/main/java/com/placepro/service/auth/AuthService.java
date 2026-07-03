@@ -109,6 +109,40 @@ public class AuthService {
         sessionManager.logout();
     }
 
+    public String resetStudentPassword(int studentId) {
+        com.placepro.service.AuthorizationHelper.requireRole(sessionManager, com.placepro.service.UserRole.ADMIN);
+        Student student = studentDAO.findById(studentId)
+                .orElseThrow(() -> new com.placepro.service.ServiceException("Student not found."));
+        String temporaryPassword = generateTemporaryPassword();
+        student.setPasswordHash(com.placepro.util.PasswordUtil.hashPassword(temporaryPassword));
+        studentDAO.update(student);
+        return temporaryPassword;
+    }
+
+    public String resetOfficerPassword(int officerId) {
+        com.placepro.service.AuthorizationHelper.requireRole(sessionManager, com.placepro.service.UserRole.ADMIN);
+        PlacementOfficer officer = placementOfficerDAO.findById(officerId)
+                .orElseThrow(() -> new com.placepro.service.ServiceException("Officer not found."));
+        String temporaryPassword = generateTemporaryPassword();
+        officer.setPasswordHash(com.placepro.util.PasswordUtil.hashPassword(temporaryPassword));
+        placementOfficerDAO.update(officer);
+        return temporaryPassword;
+    }
+
+    public String resetRecruiterPassword(int recruiterId) {
+        com.placepro.service.AuthorizationHelper.requireRole(sessionManager, com.placepro.service.UserRole.ADMIN);
+        Recruiter recruiter = recruiterDAO.findById(recruiterId)
+                .orElseThrow(() -> new com.placepro.service.ServiceException("Recruiter not found."));
+        String temporaryPassword = generateTemporaryPassword();
+        recruiter.setPasswordHash(com.placepro.util.PasswordUtil.hashPassword(temporaryPassword));
+        recruiterDAO.update(recruiter);
+        return temporaryPassword;
+    }
+
+    private String generateTemporaryPassword() {
+        return "Temp@" + java.util.UUID.randomUUID().toString().substring(0, 8);
+    }
+
     private com.placepro.service.ServiceException handleFailedLogin(String accountKey, String message) {
         loginAttemptTracker.recordFailedAttempt(accountKey);
         return new com.placepro.service.ServiceException(message);

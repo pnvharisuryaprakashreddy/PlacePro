@@ -17,6 +17,8 @@ public interface StudentDAO {
 
     List<Student> findAllActive();
 
+    List<Student> findAll();
+
     List<Student> searchByNameOrRollNumber(String keyword);
 
     boolean update(Student student);

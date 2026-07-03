@@ -19,6 +19,7 @@ public class CompanyDAOImpl extends AbstractJdbcDAO implements CompanyDAO {
     private static final String FIND_BY_ID_SQL = "SELECT * FROM companies WHERE company_id = ?";
     private static final String FIND_BY_NAME_SQL = "SELECT * FROM companies WHERE company_name = ?";
     private static final String FIND_ALL_ACTIVE_SQL = "SELECT * FROM companies WHERE is_active = 1 ORDER BY company_name";
+    private static final String FIND_ALL_SQL = "SELECT * FROM companies ORDER BY company_name";
     private static final String SEARCH_SQL = "SELECT * FROM companies WHERE company_name LIKE ? ORDER BY company_name";
     private static final String UPDATE_SQL = "UPDATE companies SET company_name = ?, industry = ?, contact_person = ?, email = ?, "
             + "phone = ?, website = ?, address = ?, is_active = ? WHERE company_id = ?";
@@ -55,6 +56,11 @@ public class CompanyDAOImpl extends AbstractJdbcDAO implements CompanyDAO {
     @Override
     public List<Company> findAllActive() {
         return findMany(FIND_ALL_ACTIVE_SQL, null);
+    }
+
+    @Override
+    public List<Company> findAll() {
+        return findMany(FIND_ALL_SQL, null);
     }
 
     @Override

@@ -17,6 +17,8 @@ public interface PlacementOfficerDAO {
 
     List<PlacementOfficer> findAllActive();
 
+    List<PlacementOfficer> findAll();
+
     List<PlacementOfficer> findByRole(String role);
 
     boolean update(PlacementOfficer officer);

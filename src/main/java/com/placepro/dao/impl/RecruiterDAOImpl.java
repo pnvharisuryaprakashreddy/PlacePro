@@ -20,6 +20,7 @@ public class RecruiterDAOImpl extends AbstractJdbcDAO implements RecruiterDAO {
     private static final String FIND_BY_EMAIL_SQL = "SELECT * FROM recruiters WHERE email = ?";
     private static final String FIND_BY_COMPANY_SQL = "SELECT * FROM recruiters WHERE company_id = ? ORDER BY full_name";
     private static final String FIND_ALL_ACTIVE_SQL = "SELECT * FROM recruiters WHERE is_active = 1 ORDER BY full_name";
+    private static final String FIND_ALL_SQL = "SELECT * FROM recruiters ORDER BY full_name";
     private static final String UPDATE_SQL = "UPDATE recruiters SET company_id = ?, full_name = ?, email = ?, phone = ?, "
             + "password_hash = ?, designation = ?, is_active = ? WHERE recruiter_id = ?";
     private static final String DEACTIVATE_SQL = "UPDATE recruiters SET is_active = 0 WHERE recruiter_id = ?";
@@ -60,6 +61,11 @@ public class RecruiterDAOImpl extends AbstractJdbcDAO implements RecruiterDAO {
     @Override
     public List<Recruiter> findAllActive() {
         return findMany(FIND_ALL_ACTIVE_SQL, null);
+    }
+
+    @Override
+    public List<Recruiter> findAll() {
+        return findMany(FIND_ALL_SQL, null);
     }
 
     @Override

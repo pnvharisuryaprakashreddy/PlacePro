@@ -4,6 +4,7 @@ import com.placepro.model.PlacementOfficer;
 import com.placepro.model.Recruiter;
 import com.placepro.model.Student;
 import com.placepro.service.auth.AuthService;
+import com.placepro.ui.AppContext;
 import com.placepro.ui.admin.AdminDashboardPanel;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.officer.OfficerDashboardPanel;
@@ -128,14 +129,27 @@ public class LoginSelectionFrame extends JFrame implements LoginNavigator {
     public void showOfficerDashboard(PlacementOfficer officer) {
         showDashboard(
                 CARD_OFFICER_DASHBOARD,
-                new OfficerDashboardPanel(officer, authService, this::showSelection));
+                new OfficerDashboardPanel(
+                        officer,
+                        authService,
+                        AppContext.getCompanyService(),
+                        AppContext.getDriveService(),
+                        AppContext.getSessionManager(),
+                        this::showSelection));
     }
 
     @Override
     public void showAdminDashboard(PlacementOfficer admin) {
         showDashboard(
                 CARD_ADMIN_DASHBOARD,
-                new AdminDashboardPanel(admin, authService, this::showSelection));
+                new AdminDashboardPanel(
+                        admin,
+                        authService,
+                        AppContext.getCompanyService(),
+                        AppContext.getDriveService(),
+                        AppContext.getUserManagementService(),
+                        AppContext.getSessionManager(),
+                        this::showSelection));
     }
 
     @Override

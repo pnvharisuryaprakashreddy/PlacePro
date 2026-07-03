@@ -21,6 +21,7 @@ public class StudentDAOImpl extends AbstractJdbcDAO implements StudentDAO {
     private static final String FIND_BY_EMAIL_SQL = "SELECT * FROM students WHERE email = ?";
     private static final String FIND_BY_ROLL_NUMBER_SQL = "SELECT * FROM students WHERE roll_number = ?";
     private static final String FIND_ALL_ACTIVE_SQL = "SELECT * FROM students WHERE is_active = 1 ORDER BY full_name";
+    private static final String FIND_ALL_SQL = "SELECT * FROM students ORDER BY full_name";
     private static final String SEARCH_SQL = "SELECT * FROM students WHERE full_name LIKE ? OR roll_number LIKE ? ORDER BY full_name";
     private static final String UPDATE_SQL = "UPDATE students SET roll_number = ?, full_name = ?, email = ?, phone = ?, "
             + "password_hash = ?, branch = ?, cgpa = ?, backlog_count = ?, graduation_year = ?, is_active = ? WHERE student_id = ?";
@@ -63,6 +64,17 @@ public class StudentDAOImpl extends AbstractJdbcDAO implements StudentDAO {
     public List<Student> findAllActive() {
         try (Connection connection = getConnection();
              PreparedStatement statement = connection.prepareStatement(FIND_ALL_ACTIVE_SQL);
+             ResultSet resultSet = statement.executeQuery()) {
+            return mapStudents(resultSet);
+        } catch (SQLException exception) {
+            throw translateException("student list", exception);
+        }
+    }
+
+    @Override
+    public List<Student> findAll() {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(FIND_ALL_SQL);
              ResultSet resultSet = statement.executeQuery()) {
             return mapStudents(resultSet);
         } catch (SQLException exception) {

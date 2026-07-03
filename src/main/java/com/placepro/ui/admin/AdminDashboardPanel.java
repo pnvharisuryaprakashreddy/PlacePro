@@ -1,27 +1,31 @@
 package com.placepro.ui.admin;
 
 import com.placepro.model.PlacementOfficer;
+import com.placepro.service.CompanyService;
+import com.placepro.service.admin.UserManagementService;
 import com.placepro.service.auth.AuthService;
-import com.placepro.ui.common.LogoutButton;
-import com.placepro.ui.common.UiStyles;
+import com.placepro.service.auth.SessionManager;
+import com.placepro.service.drive.DriveService;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import java.awt.BorderLayout;
 
 public class AdminDashboardPanel extends JPanel {
 
-    public AdminDashboardPanel(PlacementOfficer admin, AuthService authService, Runnable onLogout) {
-        setLayout(new BorderLayout(16, 16));
-
-        JLabel welcomeLabel = new JLabel(
-                "Welcome, " + admin.getFullName() + ", role: ADMIN",
-                JLabel.CENTER);
-        welcomeLabel.setFont(UiStyles.TITLE_FONT);
-        add(welcomeLabel, BorderLayout.CENTER);
-
-        JPanel southPanel = new JPanel();
-        southPanel.add(new LogoutButton(authService, onLogout));
-        add(southPanel, BorderLayout.SOUTH);
+    public AdminDashboardPanel(PlacementOfficer admin,
+                               AuthService authService,
+                               CompanyService companyService,
+                               DriveService driveService,
+                               UserManagementService userManagementService,
+                               SessionManager sessionManager,
+                               Runnable onLogout) {
+        setLayout(new java.awt.BorderLayout());
+        add(new AdminConsolePanel(
+                admin,
+                authService,
+                companyService,
+                driveService,
+                userManagementService,
+                sessionManager,
+                onLogout), java.awt.BorderLayout.CENTER);
     }
 }

@@ -21,6 +21,7 @@ public class PlacementDriveDAOImpl extends AbstractJdbcDAO implements PlacementD
     private static final String FIND_BY_COMPANY_SQL = "SELECT * FROM placement_drives WHERE company_id = ? ORDER BY application_deadline DESC";
     private static final String FIND_BY_STATUS_SQL = "SELECT * FROM placement_drives WHERE status = ? ORDER BY application_deadline DESC";
     private static final String FIND_PUBLISHED_SQL = "SELECT * FROM placement_drives WHERE status = 'PUBLISHED' ORDER BY application_deadline ASC";
+    private static final String FIND_ALL_SQL = "SELECT * FROM placement_drives ORDER BY application_deadline DESC";
     private static final String UPDATE_SQL = "UPDATE placement_drives SET company_id = ?, job_title = ?, job_description = ?, package_min = ?, "
             + "package_max = ?, min_cgpa = ?, max_backlogs = ?, allowed_branches = ?, visit_date = ?, application_deadline = ?, "
             + "status = ?, created_by = ? WHERE drive_id = ?";
@@ -82,6 +83,17 @@ public class PlacementDriveDAOImpl extends AbstractJdbcDAO implements PlacementD
             return mapList(resultSet);
         } catch (SQLException exception) {
             throw translateException("published drive list", exception);
+        }
+    }
+
+    @Override
+    public List<PlacementDrive> findAll() {
+        try (Connection connection = getConnection();
+             PreparedStatement statement = connection.prepareStatement(FIND_ALL_SQL);
+             ResultSet resultSet = statement.executeQuery()) {
+            return mapList(resultSet);
+        } catch (SQLException exception) {
+            throw translateException("placement drive list", exception);
         }
     }
 

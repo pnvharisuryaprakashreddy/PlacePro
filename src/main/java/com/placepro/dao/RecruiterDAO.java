@@ -17,6 +17,8 @@ public interface RecruiterDAO {
 
     List<Recruiter> findAllActive();
 
+    List<Recruiter> findAll();
+
     boolean update(Recruiter recruiter);
 
     boolean deactivate(int recruiterId);

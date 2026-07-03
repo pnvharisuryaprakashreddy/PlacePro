@@ -309,6 +309,11 @@ class ApplicationServiceTest {
         }
 
         @Override
+        public List<PlacementDrive> findAll() {
+            return new ArrayList<>();
+        }
+
+        @Override
         public boolean update(PlacementDrive drive) {
             return false;
         }

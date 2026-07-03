@@ -20,6 +20,7 @@ public class PlacementOfficerDAOImpl extends AbstractJdbcDAO implements Placemen
     private static final String FIND_BY_EMAIL_SQL = "SELECT * FROM placement_officers WHERE email = ?";
     private static final String FIND_BY_EMPLOYEE_ID_SQL = "SELECT * FROM placement_officers WHERE employee_id = ?";
     private static final String FIND_ALL_ACTIVE_SQL = "SELECT * FROM placement_officers WHERE is_active = 1 ORDER BY full_name";
+    private static final String FIND_ALL_SQL = "SELECT * FROM placement_officers ORDER BY full_name";
     private static final String FIND_BY_ROLE_SQL = "SELECT * FROM placement_officers WHERE role = ? ORDER BY full_name";
     private static final String UPDATE_SQL = "UPDATE placement_officers SET employee_id = ?, full_name = ?, email = ?, phone = ?, "
             + "password_hash = ?, role = ?, department = ?, is_active = ? WHERE officer_id = ?";
@@ -61,6 +62,11 @@ public class PlacementOfficerDAOImpl extends AbstractJdbcDAO implements Placemen
     @Override
     public List<PlacementOfficer> findAllActive() {
         return findMany(FIND_ALL_ACTIVE_SQL, null);
+    }
+
+    @Override
+    public List<PlacementOfficer> findAll() {
+        return findMany(FIND_ALL_SQL, null);
     }
 
     @Override

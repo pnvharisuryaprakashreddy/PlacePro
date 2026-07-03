@@ -111,6 +111,11 @@ class EligibilityServiceTest {
         }
 
         @Override
+        public List<Student> findAll() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public List<Student> searchByNameOrRollNumber(String keyword) {
             throw new UnsupportedOperationException();
         }
@@ -160,6 +165,11 @@ class EligibilityServiceTest {
 
         @Override
         public List<PlacementDrive> findPublishedDrives() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<PlacementDrive> findAll() {
             throw new UnsupportedOperationException();
         }
 
