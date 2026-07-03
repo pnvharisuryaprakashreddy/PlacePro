@@ -2,12 +2,15 @@ package com.placepro.dao;
 
 import com.placepro.model.Notification;
 
+import java.sql.Connection;
 import java.util.List;
 import java.util.Optional;
 
 public interface NotificationDAO {
 
     Notification insert(Notification notification);
+
+    Notification insert(Connection connection, Notification notification);
 
     Optional<Notification> findById(int notificationId);
 

@@ -28,8 +28,16 @@ public class NotificationDAOImpl extends AbstractJdbcDAO implements Notification
 
     @Override
     public Notification insert(Notification notification) {
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = getConnection()) {
+            return insert(connection, notification);
+        } catch (SQLException exception) {
+            throw translateException("notification insert", exception);
+        }
+    }
+
+    @Override
+    public Notification insert(Connection connection, Notification notification) {
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             bind(statement, notification);
             statement.executeUpdate();
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {

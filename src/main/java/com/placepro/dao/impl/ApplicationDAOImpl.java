@@ -25,8 +25,16 @@ public class ApplicationDAOImpl extends AbstractJdbcDAO implements ApplicationDA
 
     @Override
     public Application insert(Application application) {
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
+        try (Connection connection = getConnection()) {
+            return insert(connection, application);
+        } catch (SQLException exception) {
+            throw translateException("application insert", exception);
+        }
+    }
+
+    @Override
+    public Application insert(Connection connection, Application application) {
+        try (PreparedStatement statement = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
             bind(statement, application);
             statement.executeUpdate();
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -92,8 +100,16 @@ public class ApplicationDAOImpl extends AbstractJdbcDAO implements ApplicationDA
 
     @Override
     public boolean update(Application application) {
-        try (Connection connection = getConnection();
-             PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {
+        try (Connection connection = getConnection()) {
+            return update(connection, application);
+        } catch (SQLException exception) {
+            throw translateException("application update", exception);
+        }
+    }
+
+    @Override
+    public boolean update(Connection connection, Application application) {
+        try (PreparedStatement statement = connection.prepareStatement(UPDATE_SQL)) {
             bind(statement, application);
             statement.setInt(5, application.getApplicationId());
             return statement.executeUpdate() > 0;
