@@ -6,6 +6,7 @@ import com.placepro.model.Student;
 import com.placepro.service.auth.AuthService;
 import com.placepro.ui.AppContext;
 import com.placepro.ui.admin.AdminDashboardPanel;
+import com.placepro.ui.common.SessionIdleTimeoutManager;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.officer.OfficerDashboardPanel;
 import com.placepro.ui.recruiter.RecruiterDashboardPanel;
@@ -38,12 +39,18 @@ public class LoginSelectionFrame extends JFrame implements LoginNavigator {
     private final CardLayout cardLayout;
     private final JPanel cardPanel;
     private final Map<String, JPanel> dashboardCards = new HashMap<>();
+    private final SessionIdleTimeoutManager idleTimeoutManager;
 
     public LoginSelectionFrame(AuthService authService) {
         super("PlacePro");
         this.authService = authService;
         this.cardLayout = new CardLayout();
         this.cardPanel = new JPanel(cardLayout);
+        this.idleTimeoutManager = new SessionIdleTimeoutManager(
+                this,
+                AppContext.getSessionManager(),
+                authService,
+                this::returnToLoginAfterIdleTimeout);
 
         cardPanel.add(buildSelectionPanel(), CARD_SELECTION);
         cardPanel.add(new StudentLoginPanel(authService, this), CARD_STUDENT_LOGIN);
@@ -56,6 +63,13 @@ public class LoginSelectionFrame extends JFrame implements LoginNavigator {
         setSize(720, 560);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        idleTimeoutManager.start();
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent event) {
+                idleTimeoutManager.stop();
+            }
+        });
         showSelection();
     }
 
@@ -90,7 +104,16 @@ public class LoginSelectionFrame extends JFrame implements LoginNavigator {
 
     @Override
     public void showSelection() {
+        idleTimeoutManager.resetActivityClock();
         cardLayout.show(cardPanel, CARD_SELECTION);
+    }
+
+    private void returnToLoginAfterIdleTimeout() {
+        dashboardCards.values().forEach(cardPanel::remove);
+        dashboardCards.clear();
+        cardLayout.show(cardPanel, CARD_SELECTION);
+        cardPanel.revalidate();
+        cardPanel.repaint();
     }
 
     @Override
@@ -160,6 +183,7 @@ public class LoginSelectionFrame extends JFrame implements LoginNavigator {
     }
 
     private void showDashboard(String cardName, JPanel dashboardPanel) {
+        idleTimeoutManager.resetActivityClock();
         JPanel existing = dashboardCards.get(cardName);
         if (existing != null) {
             cardPanel.remove(existing);

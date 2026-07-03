@@ -9,6 +9,7 @@ import com.placepro.service.ServiceException;
 import com.placepro.service.UserRole;
 import com.placepro.service.auth.SessionManager;
 import com.placepro.service.notification.NotificationService;
+import com.placepro.util.AppLog;
 
 import java.util.Arrays;
 import java.util.List;
@@ -138,6 +139,7 @@ public class DriveService {
 
         drive.setStatus(nextStatus.name());
         placementDriveDAO.update(drive);
+        AppLog.driveStatusTransition(driveId, expectedStatus.name(), nextStatus.name());
         return drive;
     }
 }

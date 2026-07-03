@@ -8,6 +8,7 @@ import com.placepro.service.application.ApplicationService;
 import com.placepro.service.drive.EligibilityResult;
 import com.placepro.service.drive.EligibilityService;
 import com.placepro.service.student.StudentDriveSummary;
+import com.placepro.ui.common.UiMessages;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.common.UiTasks;
 import com.placepro.util.DateUtil;
@@ -201,15 +202,11 @@ public class DriveDetailPanel extends JPanel {
                 exception -> {
                     applyButton.setEnabled(true);
                     Throwable cause = exception.getCause() == null ? exception : exception.getCause();
+                    errorLabel.setText(UiMessages.userFacing(cause, "Unable to submit application."));
                     if (cause instanceof ServiceException
                             && cause.getMessage() != null
                             && cause.getMessage().contains("already applied")) {
-                        errorLabel.setText(cause.getMessage());
                         loadApplicationStatus();
-                    } else if (cause instanceof ServiceException) {
-                        errorLabel.setText(cause.getMessage());
-                    } else {
-                        errorLabel.setText("Unable to submit application.");
                     }
                 });
     }

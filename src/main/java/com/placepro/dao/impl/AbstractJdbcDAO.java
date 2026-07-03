@@ -1,6 +1,7 @@
 package com.placepro.dao.impl;
 
 import com.placepro.dao.DataAccessException;
+import com.placepro.util.AppLog;
 import com.placepro.util.DBConnection;
 
 import java.sql.Connection;
@@ -14,7 +15,7 @@ abstract class AbstractJdbcDAO {
     }
 
     protected DataAccessException translateException(String operation, SQLException exception) {
-        System.err.println("DAO error during " + operation + ": " + exception.getMessage());
+        AppLog.sqlError(operation, exception);
         com.placepro.monitoring.MetricsRegistry.get().recordError("dao");
         return new DataAccessException("A database error occurred while processing your request.", exception);
     }

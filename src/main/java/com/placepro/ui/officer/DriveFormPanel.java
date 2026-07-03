@@ -7,6 +7,7 @@ import com.placepro.service.ServiceException;
 import com.placepro.service.auth.SessionManager;
 import com.placepro.service.drive.DriveService;
 import com.placepro.service.drive.DriveStatus;
+import com.placepro.ui.common.UiMessages;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.common.UiTasks;
 
@@ -161,7 +162,8 @@ public class DriveFormPanel extends JPanel {
                         companyCombo.addItem(new CompanyOption(company.getCompanyId(), company.getCompanyName()));
                     }
                 },
-                exception -> errorLabel.setText(exception.getMessage()));
+                exception -> errorLabel.setText(UiMessages.userFacing(
+                        exception, "Could not load companies.")));
     }
 
     private void populate(PlacementDrive drive) {
@@ -211,14 +213,28 @@ public class DriveFormPanel extends JPanel {
     private void saveDrive() {
         errorLabel.setText(" ");
         try {
-            PlacementDrive drive = existingDrive == null ? new PlacementDrive() : existingDrive;
             CompanyOption selectedCompany = (CompanyOption) companyCombo.getSelectedItem();
             if (selectedCompany == null) {
                 throw new ServiceException("Select a company.");
             }
 
+            String jobTitle = jobTitleField.getText().trim();
+            if (jobTitle.isEmpty()) {
+                throw new ServiceException("Job title is required.");
+            }
+            if (minCgpaField.getText().trim().isEmpty()) {
+                throw new ServiceException("Minimum CGPA is required.");
+            }
+            if (maxBacklogsField.getText().trim().isEmpty()) {
+                throw new ServiceException("Maximum backlogs is required.");
+            }
+            if (deadlineField.getText().trim().isEmpty()) {
+                throw new ServiceException("Application deadline is required.");
+            }
+
+            PlacementDrive drive = existingDrive == null ? new PlacementDrive() : existingDrive;
             drive.setCompanyId(selectedCompany.getCompanyId());
-            drive.setJobTitle(jobTitleField.getText().trim());
+            drive.setJobTitle(jobTitle);
             drive.setJobDescription(descriptionArea.getText().trim());
             drive.setPackageMin(parseDecimal(packageMinField.getText().trim(), true));
             drive.setPackageMax(parseDecimal(packageMaxField.getText().trim(), true));
@@ -239,7 +255,11 @@ public class DriveFormPanel extends JPanel {
                     onSaved::accept,
                     exception -> errorLabel.setText(extractMessage(exception, "Could not save the drive.")));
         } catch (ServiceException | NumberFormatException | DateTimeParseException exception) {
-            errorLabel.setText(exception.getMessage());
+            if (exception instanceof NumberFormatException) {
+                errorLabel.setText("Enter valid numeric values for CGPA, package, or backlogs.");
+            } else {
+                errorLabel.setText(exception.getMessage());
+            }
         }
     }
 
@@ -259,8 +279,7 @@ public class DriveFormPanel extends JPanel {
     }
 
     private String extractMessage(Exception exception, String fallback) {
-        Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
-        return cause instanceof ServiceException && cause.getMessage() != null ? cause.getMessage() : fallback;
+        return UiMessages.userFacing(exception, fallback);
     }
 
     private void updateLifecycleButtons(String status) {

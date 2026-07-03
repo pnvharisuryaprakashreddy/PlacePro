@@ -6,6 +6,7 @@ import com.placepro.service.CompanyService;
 import com.placepro.service.ServiceException;
 import com.placepro.service.auth.SessionManager;
 import com.placepro.service.drive.DriveService;
+import com.placepro.ui.common.UiMessages;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.common.UiTasks;
 
@@ -153,9 +154,8 @@ public class DriveListPanel extends JPanel {
     }
 
     private void showError(Exception exception) {
-        Throwable cause = exception.getCause() == null ? exception : exception.getCause();
         statusLabel.setForeground(UiStyles.ERROR_COLOR);
-        statusLabel.setText(cause.getMessage());
+        statusLabel.setText(UiMessages.userFacing(exception, "Unable to load drives."));
     }
 
     private static final class DriveLoadResult {

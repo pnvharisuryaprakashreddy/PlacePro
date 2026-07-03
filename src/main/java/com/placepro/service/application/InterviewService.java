@@ -13,6 +13,7 @@ import com.placepro.service.ServiceException;
 import com.placepro.service.UserRole;
 import com.placepro.service.auth.SessionManager;
 import com.placepro.service.notification.NotificationService;
+import com.placepro.util.AppLog;
 import com.placepro.util.DateUtil;
 import com.placepro.util.TransactionExecutor;
 import com.placepro.util.TransactionRunner;
@@ -77,6 +78,7 @@ public class InterviewService {
         PlacementDrive drive = placementDriveDAO.findById(application.getDriveId())
                 .orElseThrow(() -> new ServiceException("Placement drive not found."));
 
+        String previousStatus = application.getStatus();
         InterviewSchedule scheduled = transactionRunner.execute(connection -> {
             InterviewSchedule savedInterview = interviewScheduleDAO.insert(connection, interviewSchedule);
             application.setStatus(ApplicationStatus.INTERVIEW_SCHEDULED.name());
@@ -98,6 +100,10 @@ public class InterviewService {
         });
         com.placepro.monitoring.MetricsRegistry.get()
                 .recordStatusChange(ApplicationStatus.INTERVIEW_SCHEDULED.name());
+        AppLog.applicationStatusTransition(
+                application.getApplicationId(),
+                previousStatus,
+                ApplicationStatus.INTERVIEW_SCHEDULED.name());
         return scheduled;
     }
 
@@ -141,6 +147,8 @@ public class InterviewService {
         });
         if (newStatus != null) {
             com.placepro.monitoring.MetricsRegistry.get().recordStatusChange(newStatus.name());
+            AppLog.applicationStatusTransition(
+                    application.getApplicationId(), previousStatus, newStatus.name());
         }
         return updatedSchedule;
     }

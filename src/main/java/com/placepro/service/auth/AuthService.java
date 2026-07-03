@@ -4,6 +4,7 @@ import com.placepro.model.PlacementOfficer;
 import com.placepro.model.Recruiter;
 import com.placepro.model.Student;
 import com.placepro.monitoring.MetricsRegistry;
+import com.placepro.util.AppLog;
 
 public class AuthService {
 
@@ -50,6 +51,7 @@ public class AuthService {
         Student savedStudent = studentDAO.insert(student);
         sessionManager.setSession(savedStudent.getStudentId(), com.placepro.service.UserRole.STUDENT);
         MetricsRegistry.get().sessionStarted();
+        AppLog.loginAttempt("STUDENT", student.getEmail(), true);
         return savedStudent;
     }
 
@@ -59,16 +61,17 @@ public class AuthService {
 
         Student student = studentDAO.findByEmail(email)
                 .filter(found -> Boolean.TRUE.equals(found.getIsActive()))
-                .orElseThrow(() -> handleFailedLogin(accountKey, "Invalid email or password."));
+                .orElseThrow(() -> handleFailedLogin(accountKey, email, "STUDENT", "Invalid email or password."));
 
         if (!com.placepro.util.PasswordUtil.verifyPassword(plainPassword, student.getPasswordHash())) {
-            throw handleFailedLogin(accountKey, "Invalid email or password.");
+            throw handleFailedLogin(accountKey, email, "STUDENT", "Invalid email or password.");
         }
 
         loginAttemptTracker.clearAttempts(accountKey);
         sessionManager.setSession(student.getStudentId(), com.placepro.service.UserRole.STUDENT);
         MetricsRegistry.get().recordLogin("STUDENT", true);
         MetricsRegistry.get().sessionStarted();
+        AppLog.loginAttempt("STUDENT", email, true);
         return student;
     }
 
@@ -78,10 +81,10 @@ public class AuthService {
 
         PlacementOfficer officer = placementOfficerDAO.findByEmail(email)
                 .filter(found -> Boolean.TRUE.equals(found.getIsActive()))
-                .orElseThrow(() -> handleFailedLogin(accountKey, "Invalid email or password."));
+                .orElseThrow(() -> handleFailedLogin(accountKey, email, "OFFICER/ADMIN", "Invalid email or password."));
 
         if (!com.placepro.util.PasswordUtil.verifyPassword(plainPassword, officer.getPasswordHash())) {
-            throw handleFailedLogin(accountKey, "Invalid email or password.");
+            throw handleFailedLogin(accountKey, email, "OFFICER/ADMIN", "Invalid email or password.");
         }
 
         loginAttemptTracker.clearAttempts(accountKey);
@@ -91,6 +94,7 @@ public class AuthService {
         sessionManager.setSession(officer.getOfficerId(), role);
         MetricsRegistry.get().recordLogin(role.name(), true);
         MetricsRegistry.get().sessionStarted();
+        AppLog.loginAttempt(role.name(), email, true);
         return officer;
     }
 
@@ -100,16 +104,17 @@ public class AuthService {
 
         Recruiter recruiter = recruiterDAO.findByEmail(email)
                 .filter(found -> Boolean.TRUE.equals(found.getIsActive()))
-                .orElseThrow(() -> handleFailedLogin(accountKey, "Invalid email or password."));
+                .orElseThrow(() -> handleFailedLogin(accountKey, email, "RECRUITER", "Invalid email or password."));
 
         if (!com.placepro.util.PasswordUtil.verifyPassword(plainPassword, recruiter.getPasswordHash())) {
-            throw handleFailedLogin(accountKey, "Invalid email or password.");
+            throw handleFailedLogin(accountKey, email, "RECRUITER", "Invalid email or password.");
         }
 
         loginAttemptTracker.clearAttempts(accountKey);
         sessionManager.setSession(recruiter.getRecruiterId(), com.placepro.service.UserRole.RECRUITER);
         MetricsRegistry.get().recordLogin("RECRUITER", true);
         MetricsRegistry.get().sessionStarted();
+        AppLog.loginAttempt("RECRUITER", email, true);
         return recruiter;
     }
 
@@ -154,10 +159,13 @@ public class AuthService {
         return "Temp@" + java.util.UUID.randomUUID().toString().substring(0, 8);
     }
 
-    private com.placepro.service.ServiceException handleFailedLogin(String accountKey, String message) {
+    private com.placepro.service.ServiceException handleFailedLogin(String accountKey,
+                                                                    String email,
+                                                                    String role,
+                                                                    String message) {
         loginAttemptTracker.recordFailedAttempt(accountKey);
-        String role = accountKey.substring(0, accountKey.indexOf(':')).toUpperCase(java.util.Locale.ENGLISH);
         MetricsRegistry.get().recordLogin(role, false);
+        AppLog.loginAttempt(role, email, false);
         return new com.placepro.service.ServiceException(message);
     }
 }

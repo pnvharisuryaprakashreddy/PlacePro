@@ -3,3 +3,4 @@
 *.iml
 config.properties
 /resumes/
+/logs/

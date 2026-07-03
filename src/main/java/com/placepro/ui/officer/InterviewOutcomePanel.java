@@ -148,6 +148,11 @@ public class InterviewOutcomePanel extends JPanel {
             return;
         }
         String outcome = (String) outcomeComboBox.getSelectedItem();
+        if (outcome == null || outcome.isBlank()) {
+            statusLabel.setForeground(UiStyles.ERROR_COLOR);
+            statusLabel.setText("Select an outcome.");
+            return;
+        }
         statusLabel.setForeground(javax.swing.UIManager.getColor("Label.foreground"));
         statusLabel.setText("Recording outcome...");
         UiTasks.run(

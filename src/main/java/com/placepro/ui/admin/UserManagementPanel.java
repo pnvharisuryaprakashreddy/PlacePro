@@ -5,6 +5,7 @@ import com.placepro.model.Recruiter;
 import com.placepro.model.Student;
 import com.placepro.service.ServiceException;
 import com.placepro.service.admin.UserManagementService;
+import com.placepro.ui.common.UiMessages;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.common.UiTasks;
 
@@ -201,11 +202,8 @@ public class UserManagementPanel extends JPanel {
     }
 
     private void showError(Exception exception) {
-        Throwable cause = exception.getCause() == null ? exception : exception.getCause();
         statusLabel.setForeground(UiStyles.ERROR_COLOR);
-        statusLabel.setText(cause instanceof ServiceException
-                ? cause.getMessage()
-                : exception.getMessage());
+        statusLabel.setText(UiMessages.userFacing(exception, "Operation failed, please try again."));
     }
 
     private enum UserType {

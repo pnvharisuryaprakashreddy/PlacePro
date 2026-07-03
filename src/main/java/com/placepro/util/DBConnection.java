@@ -31,6 +31,7 @@ public final class DBConnection {
                         getPassword());
             } catch (SQLException exception) {
                 lastException = exception;
+                AppLog.sqlError("DBConnection.getConnection attempt=" + attempt, exception);
             }
         }
 

@@ -17,6 +17,7 @@ import com.placepro.service.auth.SessionManager;
 import com.placepro.service.drive.EligibilityResult;
 import com.placepro.service.drive.EligibilityService;
 import com.placepro.service.notification.NotificationService;
+import com.placepro.util.AppLog;
 import com.placepro.util.TransactionExecutor;
 import com.placepro.util.TransactionRunner;
 
@@ -178,6 +179,7 @@ public class ApplicationService {
             return application;
         });
         com.placepro.monitoring.MetricsRegistry.get().recordStatusChange(newStatus.name());
+        AppLog.applicationStatusTransition(applicationId, previousStatus, newStatus.name());
         return updated;
     }
 

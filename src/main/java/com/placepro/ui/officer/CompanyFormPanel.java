@@ -2,7 +2,7 @@ package com.placepro.ui.officer;
 
 import com.placepro.model.Company;
 import com.placepro.service.CompanyService;
-import com.placepro.service.ServiceException;
+import com.placepro.ui.common.UiMessages;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.common.UiTasks;
 
@@ -88,8 +88,14 @@ public class CompanyFormPanel extends JPanel {
 
     private void saveCompany() {
         errorLabel.setText(" ");
+        String companyName = nameField.getText().trim();
+        if (companyName.isEmpty()) {
+            errorLabel.setText("Company name is required.");
+            return;
+        }
+
         Company company = existingCompany == null ? new Company() : existingCompany;
-        company.setCompanyName(nameField.getText().trim());
+        company.setCompanyName(companyName);
         company.setIndustry(industryField.getText().trim());
         company.setContactPerson(contactPersonField.getText().trim());
         company.setEmail(emailField.getText().trim());
@@ -104,11 +110,7 @@ public class CompanyFormPanel extends JPanel {
         UiTasks.run(
                 () -> isNew ? companyService.createCompany(company) : companyService.updateCompany(company),
                 onSaved::accept,
-                exception -> {
-                    Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
-                    errorLabel.setText(cause instanceof ServiceException && cause.getMessage() != null
-                            ? cause.getMessage()
-                            : "Could not save the company, please try again.");
-                });
+                exception -> errorLabel.setText(UiMessages.userFacing(
+                        exception, "Could not save the company, please try again.")));
     }
 }
