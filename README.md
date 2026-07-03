@@ -477,14 +477,12 @@ From the [product requirements document](PRD.md#19-future-enhancements):
 
 <br />
 
-**Author**
+**Author — P N V Hari Surya Prakash Reddy**
 
-<!-- TODO: Replace with your preferred name / team and profile link -->
-
-[![GitHub](https://img.shields.io/badge/GitHub-@YOUR_GITHUB_USERNAME-181717?style=for-the-badge&logo=github)](https://github.com/YOUR_GITHUB_USERNAME)
+[![GitHub](https://img.shields.io/badge/GitHub-@pnvharisuryaprakashreddy-181717?style=for-the-badge&logo=github)](https://github.com/pnvharisuryaprakashreddy)
 
 <br />
 
-<sub>Built as an academic project · 2026</sub>
+<sub>Built as an academic project by P N V Hari Surya Prakash Reddy · 2026</sub>
 
 </div>
