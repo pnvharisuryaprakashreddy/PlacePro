@@ -80,32 +80,45 @@ public class DriveFormPanel extends JPanel {
     }
 
     private void buildForm() {
+        setBackground(UiStyles.SURFACE_COLOR);
+        UiStyles.styleComboBox(companyCombo);
+        UiStyles.styleInput(jobTitleField);
+        UiStyles.styleInput(packageMinField);
+        UiStyles.styleInput(packageMaxField);
+        UiStyles.styleInput(minCgpaField);
+        UiStyles.styleInput(maxBacklogsField);
+        UiStyles.styleInput(visitDateField);
+        UiStyles.styleInput(deadlineField);
+        UiStyles.styleTextArea(descriptionArea);
         setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
-        constraints.insets = new Insets(6, 8, 6, 8);
+        constraints.insets = new Insets(8, 10, 8, 10);
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridwidth = 2;
 
-        add(new JLabel(existingDrive == null ? "Create Drive" : "Edit Drive"), constraints);
+        add(UiStyles.createTitleLabel(existingDrive == null ? "Create Drive" : "Edit Drive"), constraints);
         constraints.gridy++;
         add(errorLabel, constraints);
 
         constraints.gridwidth = 1;
         constraints.gridy++;
         constraints.gridx = 0;
-        add(new JLabel("Company"), constraints);
+        JLabel companyLabel = new JLabel("Company");
+        UiStyles.styleLabel(companyLabel);
+        add(companyLabel, constraints);
         constraints.gridx = 1;
         add(companyCombo, constraints);
 
         addField(constraints, "Job Title", jobTitleField);
         constraints.gridy++;
         constraints.gridx = 0;
-        add(new JLabel("Description"), constraints);
+        JLabel descriptionLabel = new JLabel("Description");
+        UiStyles.styleLabel(descriptionLabel);
+        add(descriptionLabel, constraints);
         constraints.gridx = 1;
-        descriptionArea.setLineWrap(true);
-        add(new JScrollPane(descriptionArea), constraints);
+        add(UiStyles.createScrollPane(descriptionArea), constraints);
 
         addField(constraints, "Package Min (LPA)", packageMinField);
         addField(constraints, "Package Max (LPA)", packageMaxField);
@@ -117,24 +130,31 @@ public class DriveFormPanel extends JPanel {
         constraints.gridy++;
         constraints.gridx = 0;
         constraints.gridwidth = 2;
-        JPanel branchPanel = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-        branchPanel.add(new JLabel("Allowed Branches:"));
+        JPanel branchPanel = UiStyles.createCardPanel();
+        branchPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 6));
+        branchPanel.add(UiStyles.createMutedLabel("Allowed Branches"));
         for (String branch : BranchConstants.BRANCHES) {
             JCheckBox checkBox = new JCheckBox(branch);
+            UiStyles.styleCheckBox(checkBox);
             branchCheckboxes.put(branch, checkBox);
             branchPanel.add(checkBox);
         }
         add(branchPanel, constraints);
 
         constraints.gridy++;
-        JPanel savePanel = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
-        JButton saveButton = new JButton("Save");
+        JPanel savePanel = UiStyles.createToolbarPanel();
+        savePanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 0));
+        JButton saveButton = UiStyles.stylePrimaryButton(new JButton("Save"));
         saveButton.addActionListener(event -> saveDrive());
         savePanel.add(saveButton);
         add(savePanel, constraints);
 
         constraints.gridy++;
-        JPanel lifecyclePanel = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT));
+        JPanel lifecyclePanel = UiStyles.createToolbarPanel();
+        lifecyclePanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 0));
+        UiStyles.styleSecondaryButton(publishButton);
+        UiStyles.styleSecondaryButton(closeButton);
+        UiStyles.styleSecondaryButton(completeButton);
         publishButton.addActionListener(event -> transition(driveService::publishDrive));
         closeButton.addActionListener(event -> transition(driveService::closeDrive));
         completeButton.addActionListener(event -> transition(driveService::completeDrive));
@@ -148,7 +168,9 @@ public class DriveFormPanel extends JPanel {
         constraints.gridwidth = 1;
         constraints.gridy++;
         constraints.gridx = 0;
-        add(new JLabel(label), constraints);
+        JLabel fieldLabel = new JLabel(label);
+        UiStyles.styleLabel(fieldLabel);
+        add(fieldLabel, constraints);
         constraints.gridx = 1;
         add(field, constraints);
     }

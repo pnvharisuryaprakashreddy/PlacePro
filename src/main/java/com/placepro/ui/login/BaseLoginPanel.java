@@ -5,11 +5,16 @@ import com.placepro.service.ServiceException;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.common.UiTasks;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -21,58 +26,89 @@ abstract class BaseLoginPanel<T> extends JPanel {
     protected final JTextField emailField;
     protected final JPasswordField passwordField;
     protected final JLabel errorLabel;
+    protected final JPanel formCard;
     private final JButton loginButton;
 
     BaseLoginPanel(String title, AuthService authService, LoginNavigator navigator) {
         this.authService = authService;
         this.navigator = navigator;
-
         setLayout(new GridBagLayout());
+        setBackground(UiStyles.BACKGROUND_COLOR);
+
+        formCard = new UiStyles.RoundedPanel(20, UiStyles.SURFACE_COLOR, UiStyles.BORDER_COLOR);
+        formCard.setLayout(new GridBagLayout());
+        formCard.setPreferredSize(new Dimension(440, 480));
+        formCard.setBorder(BorderFactory.createEmptyBorder(28, 32, 28, 32));
+
         GridBagConstraints constraints = new GridBagConstraints();
-        constraints.insets = new Insets(8, 8, 8, 8);
+        constraints.insets = new Insets(8, 6, 8, 6);
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.gridx = 0;
         constraints.gridy = 0;
         constraints.gridwidth = 2;
 
-        JLabel titleLabel = new JLabel(title);
-        titleLabel.setFont(UiStyles.TITLE_FONT);
-        add(titleLabel, constraints);
+        JLabel titleLabel = UiStyles.createTitleLabel(title);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        formCard.add(titleLabel, constraints);
 
         constraints.gridy++;
-        constraints.gridwidth = 1;
-        add(new JLabel("Email"), constraints);
+        JLabel subtitleLabel = UiStyles.createMutedLabel("Sign in to your enterprise workspace");
+        formCard.add(subtitleLabel, constraints);
 
-        constraints.gridx = 1;
+        constraints.gridy++;
+        constraints.insets = new Insets(16, 6, 4, 6);
+        JLabel emailLabel = new JLabel("Email Address");
+        UiStyles.styleLabel(emailLabel);
+        emailLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        formCard.add(emailLabel, constraints);
+
+        constraints.gridy++;
+        constraints.insets = new Insets(0, 6, 8, 6);
         emailField = new JTextField(24);
-        add(emailField, constraints);
+        UiStyles.styleInput(emailField);
+        formCard.add(emailField, constraints);
 
-        constraints.gridx = 0;
         constraints.gridy++;
-        add(new JLabel("Password"), constraints);
+        constraints.insets = new Insets(8, 6, 4, 6);
+        JLabel passwordLabel = new JLabel("Password");
+        UiStyles.styleLabel(passwordLabel);
+        passwordLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        formCard.add(passwordLabel, constraints);
 
-        constraints.gridx = 1;
+        constraints.gridy++;
+        constraints.insets = new Insets(0, 6, 8, 6);
         passwordField = new JPasswordField(24);
-        add(passwordField, constraints);
+        UiStyles.styleInput(passwordField);
+        formCard.add(passwordField, constraints);
 
-        constraints.gridx = 0;
         constraints.gridy++;
-        constraints.gridwidth = 2;
+        constraints.insets = new Insets(4, 6, 8, 6);
         errorLabel = UiStyles.createErrorLabel();
-        add(errorLabel, constraints);
+        formCard.add(errorLabel, constraints);
 
         constraints.gridy++;
-        loginButton = new JButton("Login");
+        constraints.insets = new Insets(8, 6, 12, 6);
+        loginButton = new JButton("Sign In");
+        UiStyles.stylePrimaryButton(loginButton);
+        loginButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        loginButton.setPreferredSize(new Dimension(0, 42));
         loginButton.addActionListener(event -> attemptLogin());
-        add(loginButton, constraints);
+        formCard.add(loginButton, constraints);
 
         constraints.gridy++;
-        add(UiStyles.createLinkLabel("Back to role selection", navigator::showSelection), constraints);
+        constraints.insets = new Insets(4, 6, 4, 6);
+        formCard.add(UiStyles.createLinkLabel("← Return to Role Selection", navigator::showSelection), constraints);
 
         addRoleSpecificLinks(constraints);
+
+        add(formCard);
     }
 
     protected void addRoleSpecificLinks(GridBagConstraints constraints) {
+    }
+
+    protected void addToForm(Component component, GridBagConstraints constraints) {
+        formCard.add(component, constraints);
     }
 
     private void attemptLogin() {
@@ -109,7 +145,7 @@ abstract class BaseLoginPanel<T> extends JPanel {
         if (cause instanceof ServiceException && cause.getMessage() != null && !cause.getMessage().isBlank()) {
             return cause.getMessage();
         }
-        return "Login failed, please try again.";
+        return "Login failed, please check credentials.";
     }
 
     protected void clearError() {
@@ -117,6 +153,6 @@ abstract class BaseLoginPanel<T> extends JPanel {
     }
 
     protected void showError(String message) {
-        errorLabel.setText(message);
+        errorLabel.setText("⚠️ " + message);
     }
 }

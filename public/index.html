@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Training & Placement Management Portal (TPO)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Global Header Bar -->
+  <header id="appHeader" style="display: none;">
+    <div class="brand">
+      <div class="brand-logo">🎓</div>
+      <div>
+        <div class="brand-title">PlacePro Campus TPO</div>
+        <div class="brand-sub" id="headerRoleBadge">Student Portal</div>
+      </div>
+    </div>
+
+    <!-- Active Navigation Bar -->
+    <nav class="nav-links" id="navLinks">
+      <!-- Injected via JavaScript based on role -->
+    </nav>
+
+    <div class="user-session">
+      <div class="session-info">
+        <div class="user-name" id="sessionUserName">Priya Sharma</div>
+        <div class="user-detail" id="sessionUserDetail">2022CSE104 • CSE</div>
+      </div>
+      <button class="logout-btn" onclick="logout()">Logout 🚪</button>
+    </div>
+  </header>
+
+  <!-- ==================== LANDING & AUTH VIEWS ==================== -->
+  <div id="landingView" class="auth-container">
+    <div class="auth-wrapper">
+      <div class="portal-brand">
+        <div class="portal-logo">🏛️</div>
+        <h1>Campus Training & Placement Portal</h1>
+        <p>Centralized TPO System for Students, Officers, Corporate Recruiters, and Administrators</p>
+      </div>
+
+      <div class="role-grid">
+        <div class="role-card student-theme" onclick="showAuthScreen('student-login')">
+          <div class="rc-icon">🎓</div>
+          <h3>Student Portal</h3>
+          <p>Discover eligible campus drives, apply with 1 click, track status, and upload resumes.</p>
+          <div class="rc-action">Student Sign In & Registration →</div>
+        </div>
+
+        <div class="role-card officer-theme" onclick="showAuthScreen('officer-login')">
+          <div class="rc-icon">🏛️</div>
+          <h3>Placement Officer</h3>
+          <p>Onboard companies, publish placement drives, review applications, and schedule rounds.</p>
+          <div class="rc-action">TPO Officer Sign In →</div>
+        </div>
+
+        <div class="role-card recruiter-theme" onclick="showAuthScreen('recruiter-login')">
+          <div class="rc-icon">💼</div>
+          <h3>Corporate Recruiter</h3>
+          <p>View shortlisted candidates for your company, inspect resumes, and record outcomes.</p>
+          <div class="rc-action">Recruiter Portal Access →</div>
+        </div>
+
+        <div class="role-card admin-theme" onclick="showAuthScreen('admin-login')">
+          <div class="rc-icon">⚡</div>
+          <h3>System Admin</h3>
+          <p>Global placement analytics, department statistics, and system user management.</p>
+          <div class="rc-action">Administrator Login →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Login Screen -->
+  <div id="studentLoginView" class="auth-container" style="display: none;">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h2>🎓 Student Login</h2>
+        <p>Enter your student email and password to access eligible campus drives</p>
+      </div>
+      <form onsubmit="handleStudentLogin(event)">
+        <div class="form-group">
+          <label>Student Email Address</label>
+          <input type="email" id="studentEmail" class="form-input" placeholder="e.g. priya.sharma@student.college.edu" required value="priya.sharma@student.college.edu">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="studentPassword" class="form-input" placeholder="••••••••" required value="Password123">
+        </div>
+        <button type="submit" class="btn-block btn-primary">Sign In to Student Portal →</button>
+      </form>
+      <div class="auth-card-footer">
+        New Student? <a href="#" onclick="showAuthScreen('student-register')">Register for Placement Season</a><br><br>
+        <a href="#" onclick="showAuthScreen('landing')">← Back to Role Gateway</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Student Registration Screen -->
+  <div id="studentRegisterView" class="auth-container" style="display: none;">
+    <div class="auth-card wide">
+      <div class="auth-card-header">
+        <h2>🎓 Student Placement Registration</h2>
+        <p>Register your official academic credentials to participate in campus recruitment</p>
+      </div>
+      <form onsubmit="handleStudentRegister(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="regName" class="form-input" placeholder="e.g. Priya Sharma" required>
+          </div>
+          <div class="form-group">
+            <label>Roll Number / College ID</label>
+            <input type="text" id="regRoll" class="form-input" placeholder="e.g. 2022CSE104" required>
+          </div>
+          <div class="form-group">
+            <label>Branch / Department</label>
+            <select id="regBranch" class="form-input" required>
+              <option value="CSE">Computer Science & Engg (CSE)</option>
+              <option value="ECE">Electronics & Comm Engg (ECE)</option>
+              <option value="IT">Information Technology (IT)</option>
+              <option value="EEE">Electrical & Electronics (EEE)</option>
+              <option value="MECH">Mechanical Engg (MECH)</option>
+              <option value="CIVIL">Civil Engg (CIVIL)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Current CGPA (0.0 - 10.0)</label>
+            <input type="number" step="0.01" min="0" max="10" id="regCgpa" class="form-input" placeholder="e.g. 8.45" required>
+          </div>
+          <div class="form-group">
+            <label>Active Backlogs Count</label>
+            <input type="number" min="0" max="10" id="regBacklogs" class="form-input" value="0" required>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="regPhone" class="form-input" placeholder="9876543210" required>
+          </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="regEmail" class="form-input" placeholder="priya@student.college.edu" required>
+          </div>
+          <div class="form-group">
+            <label>Create Password</label>
+            <input type="password" id="regPassword" class="form-input" placeholder="••••••••" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-block btn-primary margin-top">Complete Student Registration & Proceed →</button>
+      </form>
+      <div class="auth-card-footer">
+        Already Registered? <a href="#" onclick="showAuthScreen('student-login')">Log In Here</a> • <a href="#" onclick="showAuthScreen('landing')">Back to Gateway</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Placement Officer Login Screen -->
+  <div id="officerLoginView" class="auth-container" style="display: none;">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h2>🏛️ Placement Officer Login</h2>
+        <p>Training & Placement Office (TPO) Administrative Workspace</p>
+      </div>
+      <form onsubmit="handleOfficerLogin(event)">
+        <div class="form-group">
+          <label>Officer Work Email</label>
+          <input type="email" class="form-input" value="anita.rao@placepro.local" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-input" value="Password123" required>
+        </div>
+        <button type="submit" class="btn-block btn-primary">Enter Officer Console →</button>
+      </form>
+      <div class="auth-card-footer">
+        <a href="#" onclick="showAuthScreen('landing')">← Back to Role Gateway</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recruiter Login Screen -->
+  <div id="recruiterLoginView" class="auth-container" style="display: none;">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h2>💼 Corporate Recruiter Portal</h2>
+        <p>Sign in to view shortlisted candidates for your company's campus drives</p>
+      </div>
+      <form onsubmit="handleRecruiterLogin(event)">
+        <div class="form-group">
+          <label>Select Recruiting Company</label>
+          <select id="recruiterCompanySelect" class="form-input" required>
+            <option value="Microsoft India">Microsoft India</option>
+            <option value="Google Cloud">Google Cloud</option>
+            <option value="Goldman Sachs">Goldman Sachs</option>
+            <option value="Amazon AWS">Amazon AWS</option>
+            <option value="JPMorgan Chase">JPMorgan Chase</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Recruiter Email</label>
+          <input type="email" id="recruiterEmail" class="form-input" value="karan.malhotra@technova.example" required>
+        </div>
+        <div class="form-group">
+          <label>Recruiter Access Code</label>
+          <input type="password" class="form-input" value="Recruiter2026" required>
+        </div>
+        <button type="submit" class="btn-block btn-primary">Access Candidate Shortlist →</button>
+      </form>
+      <div class="auth-card-footer">
+        <a href="#" onclick="showAuthScreen('landing')">← Back to Role Gateway</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Login Screen -->
+  <div id="adminLoginView" class="auth-container" style="display: none;">
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h2>⚡ System Administrator Portal</h2>
+        <p>Governance, user account management, and institutional reporting</p>
+      </div>
+      <form onsubmit="handleAdminLogin(event)">
+        <div class="form-group">
+          <label>Admin Username</label>
+          <input type="text" class="form-input" value="admin.rahul" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" class="form-input" value="AdminPass123" required>
+        </div>
+        <button type="submit" class="btn-block btn-primary">Access Admin Console →</button>
+      </form>
+      <div class="auth-card-footer">
+        <a href="#" onclick="showAuthScreen('landing')">← Back to Role Gateway</a>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== DASHBOARD VIEWS ==================== -->
+
+  <!-- STUDENT PORTAL DASHBOARD -->
+  <div id="studentDashboard" class="main-dashboard" style="display: none;">
+    <!-- Profile Card Summary -->
+    <div class="profile-card">
+      <div class="pc-avatar">🎓</div>
+      <div class="pc-info">
+        <h2 id="stuProfileName">Priya Sharma</h2>
+        <p id="stuProfileMeta">Roll No: 2022CSE104 • Computer Science & Engg (CSE)</p>
+      </div>
+      <div class="pc-stats">
+        <div class="pcs-item">
+          <div class="pcs-val" id="stuCgpaDisplay">8.45</div>
+          <div class="pcs-lbl">CGPA</div>
+        </div>
+        <div class="pcs-item">
+          <div class="pcs-val" id="stuBacklogDisplay">0</div>
+          <div class="pcs-lbl">Backlogs</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Drives Table Section -->
+    <div class="card margin-top">
+      <div class="card-title-bar">
+        <div>
+          <h3>⚡ Campus Recruitment Drives Directory</h3>
+          <p class="muted">Click "Inspect & Check Eligibility" to verify academic rules and submit your application.</p>
+        </div>
+        <input type="text" id="stuSearchDrive" class="form-input width-auto" placeholder="🔍 Search company or role..." onkeyup="filterStudentDrives()">
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Company Name</th>
+              <th>Job Role</th>
+              <th>Package (LPA)</th>
+              <th>Cutoff CGPA</th>
+              <th>Max Backlogs</th>
+              <th>Eligible Branches</th>
+              <th>Deadline</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="studentDrivesTbody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Student Applications Tracking -->
+    <div class="card margin-top">
+      <div class="card-title-bar">
+        <h3>📋 My Submitted Applications & Interview Timeline</h3>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>App Ref</th>
+              <th>Company</th>
+              <th>Job Role</th>
+              <th>Applied Date</th>
+              <th>Current Status</th>
+              <th>Interview Slot / Outcome</th>
+            </tr>
+          </thead>
+          <tbody id="studentAppsTbody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PLACEMENT OFFICER DASHBOARD -->
+  <div id="officerDashboard" class="main-dashboard" style="display: none;">
+    <div class="action-bar">
+      <h2>🏛️ Placement Officer Management Console</h2>
+      <div class="ab-buttons">
+        <button class="btn btn-primary" onclick="openCreateDriveModal()">+ Create Placement Drive</button>
+        <button class="btn btn-secondary" onclick="openAddCompanyModal()">+ Onboard New Company</button>
+      </div>
+    </div>
+
+    <!-- Officer KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-box">
+        <div class="kb-lbl">Total Drives</div>
+        <div class="kb-val" id="offValDrives">12</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kb-lbl">Pending Applications</div>
+        <div class="kb-val" id="offValPending">24</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kb-lbl">Shortlisted Candidates</div>
+        <div class="kb-val" id="offValShortlisted">48</div>
+      </div>
+      <div class="kpi-box">
+        <div class="kb-lbl">Offers Delivered</div>
+        <div class="kb-val" id="offValOffers">32</div>
+      </div>
+    </div>
+
+    <!-- Drives Management Table -->
+    <div class="card margin-top">
+      <div class="card-title-bar">
+        <h3>⚡ Published & Draft Placement Drives</h3>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Drive ID</th>
+              <th>Company</th>
+              <th>Role</th>
+              <th>Package</th>
+              <th>Min CGPA</th>
+              <th>Allowed Branches</th>
+              <th>Deadline</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="officerDrivesTbody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Student Application Review Queue -->
+    <div class="card margin-top">
+      <div class="card-title-bar">
+        <h3>📋 Student Application Review & Shortlisting Queue</h3>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>App ID</th>
+              <th>Student Name</th>
+              <th>Roll No</th>
+              <th>Branch</th>
+              <th>CGPA</th>
+              <th>Target Drive</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="officerReviewTbody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- RECRUITER DASHBOARD -->
+  <div id="recruiterDashboard" class="main-dashboard" style="display: none;">
+    <div class="action-bar">
+      <div>
+        <h2 id="recruiterCompanyHeader">💼 Corporate Recruiter Console — Microsoft India</h2>
+        <p class="muted">Evaluate shortlisted candidates and record interview round outcomes</p>
+      </div>
+    </div>
+
+    <div class="card margin-top">
+      <div class="card-title-bar">
+        <h3>⭐ Shortlisted Candidates for Evaluation</h3>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>App Ref</th>
+              <th>Candidate Name</th>
+              <th>Roll No</th>
+              <th>Branch</th>
+              <th>CGPA</th>
+              <th>Applied Role</th>
+              <th>Status</th>
+              <th>Evaluation Action</th>
+            </tr>
+          </thead>
+          <tbody id="recruiterCandidatesTbody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ADMIN DASHBOARD -->
+  <div id="adminDashboard" class="main-dashboard" style="display: none;">
+    <div class="action-bar">
+      <h2>⚡ Administrator Intelligence & User Governance</h2>
+    </div>
+
+    <div class="charts-row margin-top">
+      <div class="chart-box">
+        <h3>Department Placement Percentage (%)</h3>
+        <canvas id="adminDeptChart" height="150"></canvas>
+      </div>
+      <div class="chart-box">
+        <h3>Top Recruiters Offer Distribution</h3>
+        <canvas id="adminCompanyChart" height="150"></canvas>
+      </div>
+    </div>
+
+    <div class="card margin-top">
+      <div class="card-title-bar">
+        <h3>👥 Portal User Account Governance</h3>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>User ID</th>
+              <th>Full Name</th>
+              <th>Role</th>
+              <th>Email / Department</th>
+              <th>Account Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>USR-101</td>
+              <td style="font-weight:700; color:#fff;">Dr. Anita Rao</td>
+              <td>Placement Officer</td>
+              <td>anita.rao@placepro.local</td>
+              <td><span class="badge badge-success">ACTIVE</span></td>
+              <td><button class="btn btn-secondary">Reset Password</button></td>
+            </tr>
+            <tr>
+              <td>USR-102</td>
+              <td style="font-weight:700; color:#fff;">Rahul Mehta</td>
+              <td>System Admin</td>
+              <td>admin.rahul@placepro.local</td>
+              <td><span class="badge badge-success">ACTIVE</span></td>
+              <td><button class="btn btn-secondary">Reset Password</button></td>
+            </tr>
+            <tr>
+              <td>USR-103</td>
+              <td style="font-weight:700; color:#fff;">Karan Malhotra</td>
+              <td>Recruiter</td>
+              <td>Microsoft India</td>
+              <td><span class="badge badge-success">ACTIVE</span></td>
+              <td><button class="btn btn-secondary">Reset Password</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ==================== MODAL DIALOGS ==================== -->
+
+  <!-- Student Drive Detail & Eligibility Modal -->
+  <div class="modal-backdrop" id="driveDetailModal" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 id="sdModalCompany">Company Name</h2>
+        <button class="close-x" onclick="closeDriveModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <h4 id="sdModalRole" style="color: var(--primary); margin-bottom: 0.75rem;">Job Role Title</h4>
+        <div class="meta-grid">
+          <div><strong>Package Band:</strong> <span id="sdModalPackage">0 LPA</span></div>
+          <div><strong>Cutoff CGPA:</strong> <span id="sdModalCgpa">0.0</span></div>
+          <div><strong>Max Backlogs:</strong> <span id="sdModalBacklogs">0</span></div>
+          <div><strong>Allowed Branches:</strong> <span id="sdModalBranches">All</span></div>
+          <div><strong>Application Deadline:</strong> <span id="sdModalDeadline">YYYY-MM-DD</span></div>
+          <div><strong>Campus Visit Date:</strong> <span id="sdModalVisit">TBD</span></div>
+        </div>
+        <p id="sdModalDesc" class="desc-text">Drive Description details...</p>
+
+        <div id="eligibilityResultBox" class="eligibility-status-box">
+          ⚡ Click "Verify Eligibility Rules" to compare your profile (CGPA, Branch, Backlogs) against cutoff criteria.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="runEligibilityCheck()">⚡ Verify Eligibility Rules</button>
+        <button class="btn btn-primary" id="btnSubmitApp" onclick="submitStudentApplication()" style="display: none;">🚀 Confirm & Submit Application</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Drive Modal (Officer) -->
+  <div class="modal-backdrop" id="createDriveModal" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>⚡ Create New Placement Drive</h2>
+        <button class="close-x" onclick="closeCreateDriveModal()">✕</button>
+      </div>
+      <form onsubmit="handleCreateDrive(event)">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Company Name</label>
+            <input type="text" id="cdCompany" class="form-input" placeholder="e.g. Microsoft India" required>
+          </div>
+          <div class="form-group">
+            <label>Job Title / Role</label>
+            <input type="text" id="cdRole" class="form-input" placeholder="e.g. Software Development Engineer" required>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Package (LPA)</label>
+              <input type="text" id="cdPackage" class="form-input" placeholder="e.g. 24.5 LPA" required>
+            </div>
+            <div class="form-group">
+              <label>Min CGPA Cutoff</label>
+              <input type="number" step="0.1" id="cdCgpa" class="form-input" placeholder="e.g. 7.5" required>
+            </div>
+            <div class="form-group">
+              <label>Max Backlogs Allowed</label>
+              <input type="number" id="cdBacklogs" class="form-input" value="0" required>
+            </div>
+            <div class="form-group">
+              <label>Allowed Branches</label>
+              <input type="text" id="cdBranches" class="form-input" placeholder="e.g. CSE, ECE, IT" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Application Deadline</label>
+            <input type="date" id="cdDeadline" class="form-input" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeCreateDriveModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Publish Placement Drive →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Candidate Evaluation Modal (Recruiter) -->
+  <div class="modal-backdrop" id="evalCandidateModal" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>💼 Candidate Interview Evaluation</h2>
+        <button class="close-x" onclick="closeEvalModal()">✕</button>
+      </div>
+      <form onsubmit="handleRecordEvaluation(event)">
+        <div class="modal-body">
+          <h4 id="evalCandidateName" style="color:#fff; margin-bottom: 0.5rem;">Priya Sharma (2022CSE104)</h4>
+          <p id="evalDriveInfo" class="muted" style="margin-bottom: 1rem;">Microsoft India • Software Development Engineer</p>
+
+          <div class="form-group">
+            <label>Selection Outcome Decision</label>
+            <select id="evalDecision" class="form-input" required>
+              <option value="SELECTED">SELECTED — Deliver Job Offer 🎉</option>
+              <option value="REJECTED">REJECTED — Not Recommended</option>
+              <option value="ON_HOLD">ON_HOLD — Hold for Waitlist</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Interviewer Feedback & Notes</label>
+            <textarea id="evalNotes" class="form-input" rows="3" placeholder="Enter technical interview feedback..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeEvalModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Decision →</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer>
+    Campus Training & Placement Office (TPO) Management Portal &copy; 2026 • Local Server Port 8080
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

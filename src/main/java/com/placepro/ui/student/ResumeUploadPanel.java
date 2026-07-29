@@ -9,6 +9,7 @@ import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.common.UiTasks;
 import com.placepro.util.DateUtil;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -18,8 +19,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -35,19 +40,20 @@ public class ResumeUploadPanel extends JPanel {
 
     private final Student student;
     private final ResumeService resumeService;
-    private final JLabel currentResumeLabel = new JLabel("No resume uploaded yet.");
-    private final JLabel statusLabel = new JLabel(" ");
-    private final JButton uploadButton = new JButton("Upload Resume");
-    private final JButton replaceButton = new JButton("Replace Resume");
-    private final JButton openResumeButton = new JButton("Open Resume");
-    private final JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+    private final JLabel currentResumeLabel = new JLabel("No resume file uploaded yet.");
+    private final JLabel statusLabel = UiStyles.createStatusLabel();
+    private final JButton uploadButton = UiStyles.stylePrimaryButton(new JButton("📤 Upload Resume (PDF/DOCX)"));
+    private final JButton replaceButton = UiStyles.stylePrimaryButton(new JButton("🔄 Replace Resume"));
+    private final JButton openResumeButton = UiStyles.styleSecondaryButton(new JButton("👁️ View Uploaded Resume"));
+    private final JPanel actionsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 0));
 
     private Resume currentResume;
 
     public ResumeUploadPanel(Student student, ResumeService resumeService, StudentNavigator navigator) {
         this.student = student;
         this.resumeService = resumeService;
-        setLayout(new BorderLayout(12, 12));
+        setLayout(new BorderLayout());
+        setBackground(UiStyles.BACKGROUND_COLOR);
         buildLayout(navigator);
         updateResumeDisplay(Optional.empty());
         loadCurrentResume();
@@ -58,54 +64,90 @@ public class ResumeUploadPanel extends JPanel {
     }
 
     private void buildLayout(StudentNavigator navigator) {
-        JPanel header = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton backButton = new JButton("Back to Dashboard");
+        // Dark Slate Top Header
+        JPanel header = new UiStyles.DarkHeaderPanel();
+        header.setLayout(new FlowLayout(FlowLayout.LEFT, 16, 14));
+
+        JButton backButton = UiStyles.styleSecondaryButton(new JButton("← Dashboard"));
         backButton.addActionListener(event -> navigator.showDashboard());
         header.add(backButton);
+
+        JLabel title = new JLabel("Student Resume Vault & Document Profile");
+        title.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        title.setForeground(Color.WHITE);
+        header.add(title);
+
         add(header, BorderLayout.NORTH);
 
+        // Center Content Card
+        JPanel card = new UiStyles.RoundedPanel(16, UiStyles.SURFACE_COLOR, UiStyles.BORDER_COLOR);
+        card.setLayout(new BorderLayout(20, 20));
+        card.setBorder(BorderFactory.createEmptyBorder(24, 28, 24, 28));
+
         JPanel center = new JPanel();
+        center.setOpaque(false);
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
 
-        JLabel titleLabel = new JLabel("Profile / Resume");
-        titleLabel.setAlignmentX(LEFT_ALIGNMENT);
-        center.add(titleLabel);
-        center.add(Box.createVerticalStrut(8));
+        JLabel sectionTitle = new JLabel("Official Student Resume File");
+        sectionTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        sectionTitle.setForeground(UiStyles.TEXT_COLOR);
+        sectionTitle.setAlignmentX(LEFT_ALIGNMENT);
+        center.add(sectionTitle);
+        center.add(Box.createVerticalStrut(10));
 
+        currentResumeLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        currentResumeLabel.setForeground(UiStyles.TEXT_COLOR);
         currentResumeLabel.setAlignmentX(LEFT_ALIGNMENT);
         center.add(currentResumeLabel);
-        center.add(Box.createVerticalStrut(12));
+        center.add(Box.createVerticalStrut(20));
 
         uploadButton.addActionListener(event -> chooseAndUpload());
         replaceButton.addActionListener(event -> chooseAndUpload());
         openResumeButton.addActionListener(event -> openCurrentResume());
+
+        actionsPanel.setOpaque(false);
         actionsPanel.setAlignmentX(LEFT_ALIGNMENT);
         actionsPanel.add(uploadButton);
         actionsPanel.add(replaceButton);
         actionsPanel.add(openResumeButton);
         center.add(actionsPanel);
 
-        JPanel centerWrapper = new JPanel(new BorderLayout());
-        centerWrapper.add(center, BorderLayout.NORTH);
-        add(centerWrapper, BorderLayout.CENTER);
+        center.add(Box.createVerticalStrut(24));
+        JLabel infoBox = new JLabel("<html><body style='width: 480px; font-family: Segoe UI; color: #64748B'>"
+                + "ℹ️ <b>Resume Upload Guidelines:</b><br/>"
+                + "• Supported File Formats: PDF (.pdf), Microsoft Word (.doc, .docx)<br/>"
+                + "• Maximum Allowed Size: " + AppConfig.getResumesMaxSizeKb() + " KB<br/>"
+                + "• Once uploaded, corporate recruiters and placement officers can view your resume for drive shortlisting."
+                + "</body></html>");
+        infoBox.setAlignmentX(LEFT_ALIGNMENT);
+        center.add(infoBox);
 
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        card.add(center, BorderLayout.NORTH);
+
+        JPanel mainWrapper = new JPanel(new BorderLayout());
+        mainWrapper.setBackground(UiStyles.BACKGROUND_COLOR);
+        mainWrapper.setBorder(BorderFactory.createEmptyBorder(24, 28, 24, 28));
+        mainWrapper.add(card, BorderLayout.CENTER);
+
+        JPanel footer = new UiStyles.RoundedPanel(12, UiStyles.SURFACE_COLOR, UiStyles.BORDER_COLOR);
+        footer.setLayout(new FlowLayout(FlowLayout.LEFT, 14, 10));
         footer.add(statusLabel);
-        add(footer, BorderLayout.SOUTH);
+        mainWrapper.add(footer, BorderLayout.SOUTH);
+
+        add(mainWrapper, BorderLayout.CENTER);
     }
 
     private void loadCurrentResume() {
-        statusLabel.setForeground(javax.swing.UIManager.getColor("Label.foreground"));
-        statusLabel.setText("Loading resume...");
+        statusLabel.setText("Fetching resume vault record...");
         UiTasks.run(
                 () -> resumeService.getCurrentResumeForStudent(student.getStudentId()),
                 optionalResume -> {
                     updateResumeDisplay(optionalResume);
-                    statusLabel.setText(" ");
+                    statusLabel.setText("✅ Resume vault synced.");
                 },
                 exception -> {
                     statusLabel.setForeground(UiStyles.ERROR_COLOR);
-                    statusLabel.setText("Unable to load resume.");
+                    statusLabel.setText("⚠️ Unable to load resume.");
                     UiExceptionHandler.handle(this, exception);
                 });
     }
@@ -113,18 +155,18 @@ public class ResumeUploadPanel extends JPanel {
     private void updateResumeDisplay(Optional<Resume> optionalResume) {
         currentResume = optionalResume.orElse(null);
         if (currentResume == null) {
-            currentResumeLabel.setText("No resume uploaded yet.");
+            currentResumeLabel.setText("⚠️ No resume file uploaded yet.");
             uploadButton.setVisible(true);
             replaceButton.setVisible(false);
             openResumeButton.setVisible(false);
         } else {
             currentResumeLabel.setText(String.format(
-                    "Uploaded file: %s (%s, %d KB, uploaded %s)",
+                    "📄 Active Resume File: %s (%s, %d KB) — Uploaded: %s",
                     currentResume.getFileName(),
-                    currentResume.getFileType(),
+                    currentResume.getFileType().toUpperCase(Locale.ENGLISH),
                     currentResume.getFileSizeKb(),
                     currentResume.getUploadedAt() == null
-                            ? "-"
+                            ? "N/A"
                             : DateUtil.formatDateTime(currentResume.getUploadedAt())));
             uploadButton.setVisible(false);
             replaceButton.setVisible(true);
@@ -136,7 +178,7 @@ public class ResumeUploadPanel extends JPanel {
 
     private void chooseAndUpload() {
         JFileChooser chooser = new JFileChooser();
-        chooser.setFileFilter(new FileNameExtensionFilter("PDF and Word documents", "pdf", "doc", "docx"));
+        chooser.setFileFilter(new FileNameExtensionFilter("PDF and Word documents (*.pdf, *.doc, *.docx)", "pdf", "doc", "docx"));
         chooser.setAcceptAllFileFilterUsed(false);
         int result = chooser.showOpenDialog(this);
         if (result != JFileChooser.APPROVE_OPTION || chooser.getSelectedFile() == null) {
@@ -151,14 +193,14 @@ public class ResumeUploadPanel extends JPanel {
         Path selectedPath = selectedFile.toPath();
         String fileName = selectedFile.getName();
         setUploadInProgress(true);
-        statusLabel.setForeground(javax.swing.UIManager.getColor("Label.foreground"));
-        statusLabel.setText("Uploading resume...");
+        statusLabel.setText("Uploading resume file to secure vault...");
 
         UiTasks.run(
                 () -> resumeService.uploadResume(student.getStudentId(), fileName, selectedPath),
                 uploaded -> {
                     setUploadInProgress(false);
-                    statusLabel.setText("Resume uploaded successfully.");
+                    statusLabel.setForeground(UiStyles.SUCCESS_COLOR);
+                    statusLabel.setText("✅ Resume uploaded successfully.");
                     updateResumeDisplay(Optional.of(uploaded));
                 },
                 exception -> {
@@ -196,8 +238,8 @@ public class ResumeUploadPanel extends JPanel {
             if (fileSizeKb > maxFileSizeKb) {
                 JOptionPane.showMessageDialog(
                         this,
-                        "Resume file exceeds the maximum allowed size of " + maxFileSizeKb + " KB.",
-                        "File Too Large",
+                        "Resume file exceeds maximum allowed size of " + maxFileSizeKb + " KB.",
+                        "File Size Limit Exceeded",
                         JOptionPane.ERROR_MESSAGE);
                 return false;
             }
@@ -219,7 +261,7 @@ public class ResumeUploadPanel extends JPanel {
                 JOptionPane.showMessageDialog(
                         this,
                         "Resume file is no longer available on disk.",
-                        "PlacePro",
+                        "PlacePro Vault",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -227,7 +269,7 @@ public class ResumeUploadPanel extends JPanel {
                 JOptionPane.showMessageDialog(
                         this,
                         "Opening files is not supported on this system.",
-                        "PlacePro",
+                        "PlacePro Vault",
                         JOptionPane.ERROR_MESSAGE);
                 return;
             }

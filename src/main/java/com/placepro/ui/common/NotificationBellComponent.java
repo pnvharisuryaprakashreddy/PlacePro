@@ -6,34 +6,37 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.Window;
+import java.awt.geom.Ellipse2D;
+import java.awt.geom.RoundRectangle2D;
 
 /**
- * Reusable notification bell for dashboard top bars. Shows the current user's
- * unread count as a badge and opens the notification inbox when clicked.
- *
- * Polls every {@link #POLL_INTERVAL_MS} using a javax.swing.Timer; the timer
- * fires on the EDT and the actual database call runs on a background worker.
- * Polling starts when the component is added to a visible hierarchy and stops
- * when it is removed (e.g. on logout), so no stale polling survives the screen.
+ * Enterprise Notification Bell with anti-aliased vector badge.
  */
 public class NotificationBellComponent extends JButton {
 
     private static final int POLL_INTERVAL_MS = 20_000;
-    private static final String BELL = "\uD83D\uDD14";
-
     private final NotificationService notificationService;
     private final Timer pollTimer;
+    private int unreadCount = 0;
 
     public NotificationBellComponent(NotificationService notificationService) {
-        super(BELL);
+        super();
         this.notificationService = notificationService;
-        setToolTipText("Notifications");
         setFocusPainted(false);
-        setMargin(new java.awt.Insets(2, 8, 2, 8));
-        setPreferredSize(new Dimension(72, 28));
+        setOpaque(false);
+        setContentAreaFilled(false);
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        setToolTipText("Notifications");
+        setPreferredSize(new Dimension(84, 34));
         addActionListener(event -> openInbox());
 
         pollTimer = new Timer(POLL_INTERVAL_MS, event -> refreshUnreadCount());
@@ -55,35 +58,65 @@ public class NotificationBellComponent extends JButton {
     public void refreshUnreadCount() {
         UiTasks.run(
                 notificationService::getUnreadCountForCurrentUser,
-                this::showUnreadCount,
+                count -> {
+                    this.unreadCount = count;
+                    repaint();
+                },
                 exception -> {
-                    // Session may have ended or the DB may be briefly unreachable;
-                    // fail silently rather than interrupting the user every poll.
-                    setText(BELL);
-                    setForeground(null);
+                    this.unreadCount = 0;
+                    repaint();
                 });
     }
 
-    private void showUnreadCount(int unreadCount) {
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        int w = getWidth();
+        int h = getHeight();
+
+        // Button rounded pill background
+        boolean isHover = getModel().isRollover();
+        g2.setColor(isHover ? UiStyles.SURFACE_ALT_COLOR : UiStyles.SURFACE_COLOR);
+        g2.fill(new RoundRectangle2D.Float(0, 0, w, h, 12, 12));
+        g2.setColor(UiStyles.BORDER_COLOR);
+        g2.setStroke(new BasicStroke(1f));
+        g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, w - 1, h - 1, 12, 12));
+
+        // Draw bell symbol / label text
+        g2.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        g2.setColor(UiStyles.TEXT_COLOR);
+        g2.drawString("🔔 Alert", 12, h / 2 + 4);
+
+        // Draw unread badge bubble if unreadCount > 0
         if (unreadCount > 0) {
-            setText(BELL + " " + (unreadCount > 99 ? "99+" : unreadCount));
-            setForeground(new Color(198, 40, 40));
-            setToolTipText(unreadCount + " unread notification(s)");
-        } else {
-            setText(BELL);
-            setForeground(null);
-            setToolTipText("No unread notifications");
+            String badgeText = unreadCount > 99 ? "99+" : String.valueOf(unreadCount);
+            g2.setFont(new Font("Segoe UI", Font.BOLD, 10));
+            java.awt.FontMetrics fm = g2.getFontMetrics();
+            int bw = Math.max(18, fm.stringWidth(badgeText) + 8);
+            int bh = 18;
+            int bx = w - bw - 4;
+            int by = (h - bh) / 2;
+
+            g2.setColor(UiStyles.ERROR_COLOR);
+            g2.fill(new RoundRectangle2D.Float(bx, by, bw, bh, 18, 18));
+
+            g2.setColor(Color.WHITE);
+            g2.drawString(badgeText, bx + (bw - fm.stringWidth(badgeText)) / 2, by + 13);
         }
+
+        g2.dispose();
     }
 
     private void openInbox() {
         Window owner = SwingUtilities.getWindowAncestor(this);
-        JDialog dialog = new JDialog(owner, "Notifications", JDialog.ModalityType.APPLICATION_MODAL);
+        JDialog dialog = new JDialog(owner, "Notification Center", JDialog.ModalityType.APPLICATION_MODAL);
         NotificationInboxPanel inboxPanel = new NotificationInboxPanel(
                 notificationService,
                 this::refreshUnreadCount);
         dialog.setContentPane(inboxPanel);
-        dialog.setSize(560, 420);
+        dialog.setSize(600, 480);
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
         refreshUnreadCount();

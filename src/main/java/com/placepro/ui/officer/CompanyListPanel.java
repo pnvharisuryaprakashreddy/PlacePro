@@ -47,12 +47,18 @@ public class CompanyListPanel extends JPanel {
     public CompanyListPanel(CompanyService companyService) {
         this.companyService = companyService;
         setLayout(new BorderLayout(8, 8));
+        setBackground(UiStyles.BACKGROUND_COLOR);
         buildLayout();
         loadCompanies();
     }
 
     private void buildLayout() {
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        UiStyles.styleInput(nameFilterField);
+        UiStyles.styleInput(industryFilterField);
+        UiStyles.styleComboBox(activeFilterCombo);
+        UiStyles.styleComboBox(driveFilterCombo);
+        JPanel filterPanel = UiStyles.createToolbarPanel();
+        filterPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
         filterPanel.add(new JLabel("Name"));
         filterPanel.add(nameFilterField);
         filterPanel.add(new JLabel("Industry"));
@@ -62,22 +68,24 @@ public class CompanyListPanel extends JPanel {
         filterPanel.add(new JLabel("Drives"));
         filterPanel.add(driveFilterCombo);
 
-        JButton searchButton = new JButton("Search");
+        JButton searchButton = UiStyles.styleSecondaryButton(new JButton("Search"));
         searchButton.addActionListener(event -> loadCompanies());
         filterPanel.add(searchButton);
         add(filterPanel, BorderLayout.NORTH);
 
         companyTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        add(new JScrollPane(companyTable), BorderLayout.CENTER);
+        UiStyles.styleTable(companyTable);
+        add(UiStyles.createScrollPane(companyTable), BorderLayout.CENTER);
 
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton addButton = new JButton("Add");
+        JPanel actionPanel = UiStyles.createToolbarPanel();
+        actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JButton addButton = UiStyles.stylePrimaryButton(new JButton("Add"));
         addButton.addActionListener(event -> openCompanyForm(null));
-        JButton editButton = new JButton("Edit");
+        JButton editButton = UiStyles.styleSecondaryButton(new JButton("Edit"));
         editButton.addActionListener(event -> editSelectedCompany());
-        JButton deactivateButton = new JButton("Deactivate");
+        JButton deactivateButton = UiStyles.styleDangerButton(new JButton("Deactivate"));
         deactivateButton.addActionListener(event -> deactivateSelectedCompany());
-        JButton drillDownButton = new JButton("View Drives & Outcomes");
+        JButton drillDownButton = UiStyles.styleSecondaryButton(new JButton("View Drives & Outcomes"));
         drillDownButton.addActionListener(event -> showDriveDrillDown());
 
         actionPanel.add(addButton);
@@ -130,6 +138,7 @@ public class CompanyListPanel extends JPanel {
         });
         dialog.setContentPane(formPanel);
         dialog.pack();
+        dialog.getRootPane().setBorder(javax.swing.BorderFactory.createLineBorder(UiStyles.BORDER_COLOR));
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }
@@ -206,11 +215,14 @@ public class CompanyListPanel extends JPanel {
                 "Drives & Placement Outcomes - " + company.getCompanyName(),
                 java.awt.Dialog.ModalityType.APPLICATION_MODAL);
         JPanel content = new JPanel(new BorderLayout(8, 8));
+        content.setBackground(UiStyles.SURFACE_COLOR);
         content.add(new JLabel(report.getRows().isEmpty()
                 ? "This company has no placement drives yet."
                 : report.getRows().size() + " drive(s). Counts show applied / shortlisted / interviewed / selected."),
                 BorderLayout.NORTH);
-        content.add(new JScrollPane(new JTable(model)), BorderLayout.CENTER);
+        JTable table = new JTable(model);
+        UiStyles.styleTable(table);
+        content.add(UiStyles.createScrollPane(table), BorderLayout.CENTER);
         dialog.setContentPane(content);
         dialog.setSize(760, 340);
         dialog.setLocationRelativeTo(this);

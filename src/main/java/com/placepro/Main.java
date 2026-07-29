@@ -6,6 +6,7 @@ import com.placepro.ui.AppContext;
 import com.placepro.ui.common.UiExceptionHandler;
 import com.placepro.ui.login.LoginSelectionFrame;
 import com.placepro.util.AppLog;
+import com.placepro.web.PlaceProWebServer;
 
 import javax.swing.SwingUtilities;
 import java.nio.file.Files;
@@ -21,6 +22,7 @@ public final class Main {
         AppLog.info("PlacePro starting");
         Thread.setDefaultUncaughtExceptionHandler(new UiExceptionHandler());
         startMonitoring();
+        startWebServer();
         SwingUtilities.invokeLater(() -> {
             LoginSelectionFrame frame = new LoginSelectionFrame(AppContext.getAuthService());
             frame.setVisible(true);
@@ -35,11 +37,15 @@ public final class Main {
         }
     }
 
-    /**
-     * Optional operational monitoring. Any failure here (bad config, port in
-     * use, missing classes) is logged and ignored so the placement workflow
-     * always starts normally.
-     */
+    private static void startWebServer() {
+        try {
+            int port = AppConfig.getIntProperty("web.port", 8080);
+            new PlaceProWebServer().start(port);
+        } catch (Throwable throwable) {
+            System.err.println("[web-server] WARNING: web server disabled: " + throwable.getMessage());
+        }
+    }
+
     private static void startMonitoring() {
         try {
             int port = AppConfig.getIntProperty("metrics.port", 9400);

@@ -15,7 +15,7 @@ public class StudentLoginPanel extends BaseLoginPanel<Student> {
     @Override
     protected void addRoleSpecificLinks(GridBagConstraints constraints) {
         constraints.gridy++;
-        add(UiStyles.createLinkLabel("New student? Register here", navigator::showStudentRegistration), constraints);
+        addToForm(UiStyles.createLinkLabel("New student? Register here", navigator::showStudentRegistration), constraints);
     }
 
     @Override

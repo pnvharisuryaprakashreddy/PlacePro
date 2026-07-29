@@ -51,26 +51,31 @@ public class DriveListPanel extends JPanel {
         this.companyService = companyService;
         this.sessionManager = sessionManager;
         setLayout(new BorderLayout(8, 8));
+        setBackground(UiStyles.BACKGROUND_COLOR);
         buildLayout();
         loadDrives();
     }
 
     private void buildLayout() {
-        JPanel filterPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        UiStyles.styleComboBox(statusFilterCombo);
+        JPanel filterPanel = UiStyles.createToolbarPanel();
+        filterPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
         filterPanel.add(new JLabel("Status"));
         filterPanel.add(statusFilterCombo);
-        JButton searchButton = new JButton("Search");
+        JButton searchButton = UiStyles.styleSecondaryButton(new JButton("Search"));
         searchButton.addActionListener(event -> loadDrives());
         filterPanel.add(searchButton);
         add(filterPanel, BorderLayout.NORTH);
 
         driveTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
-        add(new JScrollPane(driveTable), BorderLayout.CENTER);
+        UiStyles.styleTable(driveTable);
+        add(UiStyles.createScrollPane(driveTable), BorderLayout.CENTER);
 
-        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        JButton addButton = new JButton("Add");
+        JPanel actionPanel = UiStyles.createToolbarPanel();
+        actionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        JButton addButton = UiStyles.stylePrimaryButton(new JButton("Add"));
         addButton.addActionListener(event -> openDriveForm(null));
-        JButton editButton = new JButton("Edit");
+        JButton editButton = UiStyles.styleSecondaryButton(new JButton("Edit"));
         editButton.addActionListener(event -> editSelectedDrive());
         actionPanel.add(addButton);
         actionPanel.add(editButton);
@@ -131,6 +136,7 @@ public class DriveListPanel extends JPanel {
                 });
         dialog.setContentPane(formPanel);
         dialog.pack();
+        dialog.getRootPane().setBorder(javax.swing.BorderFactory.createLineBorder(UiStyles.BORDER_COLOR));
         dialog.setLocationRelativeTo(this);
         dialog.setVisible(true);
     }

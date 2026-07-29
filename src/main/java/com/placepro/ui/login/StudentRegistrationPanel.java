@@ -6,11 +6,16 @@ import com.placepro.service.auth.AuthService;
 import com.placepro.ui.common.UiStyles;
 import com.placepro.ui.common.UiTasks;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -28,14 +33,14 @@ public class StudentRegistrationPanel extends JPanel {
     private final AuthService authService;
     private final LoginNavigator navigator;
 
-    private final JTextField nameField = new JTextField(24);
-    private final JTextField rollNumberField = new JTextField(24);
-    private final JTextField branchField = new JTextField(24);
-    private final JTextField cgpaField = new JTextField(24);
-    private final JTextField emailField = new JTextField(24);
-    private final JTextField phoneField = new JTextField(24);
-    private final JPasswordField passwordField = new JPasswordField(24);
-    private final JPasswordField confirmPasswordField = new JPasswordField(24);
+    private final JTextField nameField = new JTextField(18);
+    private final JTextField rollNumberField = new JTextField(18);
+    private final JTextField branchField = new JTextField(18);
+    private final JTextField cgpaField = new JTextField(18);
+    private final JTextField emailField = new JTextField(18);
+    private final JTextField phoneField = new JTextField(18);
+    private final JPasswordField passwordField = new JPasswordField(18);
+    private final JPasswordField confirmPasswordField = new JPasswordField(18);
     private final JLabel generalErrorLabel = UiStyles.createErrorLabel();
     private final Map<String, JLabel> fieldErrors = new HashMap<>();
 
@@ -47,56 +52,101 @@ public class StudentRegistrationPanel extends JPanel {
 
     private void buildLayout() {
         setLayout(new GridBagLayout());
+        setBackground(UiStyles.BACKGROUND_COLOR);
+
+        JPanel card = new UiStyles.RoundedPanel(20, UiStyles.SURFACE_COLOR, UiStyles.BORDER_COLOR);
+        card.setLayout(new GridBagLayout());
+        card.setBorder(BorderFactory.createEmptyBorder(24, 32, 24, 32));
+        card.setPreferredSize(new Dimension(640, 540));
+
         GridBagConstraints constraints = new GridBagConstraints();
-        constraints.insets = new Insets(6, 8, 6, 8);
+        constraints.insets = new Insets(6, 6, 6, 6);
         constraints.fill = GridBagConstraints.HORIZONTAL;
         constraints.gridx = 0;
         constraints.gridy = 0;
-        constraints.gridwidth = 2;
+        constraints.gridwidth = 4;
 
         JLabel titleLabel = new JLabel("Student Registration");
-        titleLabel.setFont(UiStyles.TITLE_FONT);
-        add(titleLabel, constraints);
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        titleLabel.setForeground(UiStyles.TEXT_COLOR);
+        card.add(titleLabel, constraints);
 
         constraints.gridy++;
-        add(generalErrorLabel, constraints);
-
-        addField(constraints, "Full Name", nameField, "name");
-        addField(constraints, "Roll Number", rollNumberField, "rollNumber");
-        addField(constraints, "Branch", branchField, "branch");
-        addField(constraints, "CGPA", cgpaField, "cgpa");
-        addField(constraints, "Email", emailField, "email");
-        addField(constraints, "Phone", phoneField, "phone");
-        addField(constraints, "Password", passwordField, "password");
-        addField(constraints, "Confirm Password", confirmPasswordField, "confirmPassword");
+        JLabel subLabel = UiStyles.createMutedLabel("Create your placement profile to start applying for corporate drives.");
+        card.add(subLabel, constraints);
 
         constraints.gridy++;
-        JButton registerButton = new JButton("Register");
+        generalErrorLabel.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        card.add(generalErrorLabel, constraints);
+
+        // 2-Column form grid
+        int y = constraints.gridy + 1;
+
+        addFormField(card, "Full Name", nameField, "name", 0, y);
+        addFormField(card, "Roll Number", rollNumberField, "rollNumber", 2, y);
+
+        y += 2;
+        addFormField(card, "Branch / Dept", branchField, "branch", 0, y);
+        addFormField(card, "Current CGPA (0-10)", cgpaField, "cgpa", 2, y);
+
+        y += 2;
+        addFormField(card, "Email Address", emailField, "email", 0, y);
+        addFormField(card, "Phone Number", phoneField, "phone", 2, y);
+
+        y += 2;
+        addFormField(card, "Account Password", passwordField, "password", 0, y);
+        addFormField(card, "Confirm Password", confirmPasswordField, "confirmPassword", 2, y);
+
+        y += 2;
+        constraints.gridy = y;
+        constraints.gridx = 0;
+        constraints.gridwidth = 4;
+        constraints.insets = new Insets(16, 6, 8, 6);
+
+        JButton registerButton = UiStyles.stylePrimaryButton(new JButton("Complete Registration & Proceed →"));
+        registerButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        registerButton.setPreferredSize(new Dimension(0, 42));
         registerButton.addActionListener(event -> attemptRegistration());
-        add(registerButton, constraints);
+        card.add(registerButton, constraints);
 
         constraints.gridy++;
-        add(UiStyles.createLinkLabel("Already registered? Back to student login", navigator::showStudentLogin), constraints);
+        constraints.insets = new Insets(4, 6, 4, 6);
+        JPanel linksPanel = new JPanel();
+        linksPanel.setOpaque(false);
+        linksPanel.add(UiStyles.createLinkLabel("Already registered? Login here", navigator::showStudentLogin));
+        linksPanel.add(new JLabel("  •  "));
+        linksPanel.add(UiStyles.createLinkLabel("Return to Role Selection", navigator::showSelection));
+        card.add(linksPanel, constraints);
 
-        constraints.gridy++;
-        add(UiStyles.createLinkLabel("Back to role selection", navigator::showSelection), constraints);
+        JScrollPane scroll = new JScrollPane(card);
+        scroll.setBorder(BorderFactory.createEmptyBorder());
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+
+        add(card);
     }
 
-    private void addField(GridBagConstraints constraints, String label, JTextField field, String key) {
-        constraints.gridwidth = 1;
-        constraints.gridy++;
-        constraints.gridx = 0;
-        add(new JLabel(label), constraints);
+    private void addFormField(JPanel parent, String labelText, JTextField field, String key, int col, int row) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.insets = new Insets(4, 6, 2, 6);
+        c.gridx = col;
+        c.gridy = row;
+        c.gridwidth = 2;
 
-        constraints.gridx = 1;
-        add(field, constraints);
+        JLabel lbl = new JLabel(labelText);
+        lbl.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        lbl.setForeground(UiStyles.TEXT_COLOR);
+        parent.add(lbl, c);
 
-        constraints.gridy++;
-        constraints.gridx = 0;
-        constraints.gridwidth = 2;
-        JLabel errorLabel = UiStyles.createErrorLabel();
-        fieldErrors.put(key, errorLabel);
-        add(errorLabel, constraints);
+        c.gridy = row + 1;
+        UiStyles.styleInput(field);
+        parent.add(field, c);
+
+        c.gridy = row + 1; // place error label right below
+        JLabel err = UiStyles.createErrorLabel();
+        err.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        fieldErrors.put(key, err);
     }
 
     private void attemptRegistration() {
@@ -119,7 +169,7 @@ public class StudentRegistrationPanel extends JPanel {
         valid &= requireNonEmpty("email", email, "Email is required.");
         valid &= requireNonEmpty("phone", phone, "Phone number is required.");
         valid &= requireNonEmpty("password", password, "Password is required.");
-        valid &= requireNonEmpty("confirmPassword", confirmPassword, "Please confirm your password.");
+        valid &= requireNonEmpty("confirmPassword", confirmPassword, "Please confirm password.");
 
         BigDecimal cgpa = null;
         if (cgpaText.isEmpty()) {
@@ -129,27 +179,27 @@ public class StudentRegistrationPanel extends JPanel {
             try {
                 cgpa = new BigDecimal(cgpaText);
                 if (cgpa.compareTo(BigDecimal.ZERO) < 0 || cgpa.compareTo(new BigDecimal("10.00")) > 0) {
-                    setFieldError("cgpa", "CGPA must be between 0.00 and 10.00.");
+                    setFieldError("cgpa", "CGPA must be 0.00 - 10.00.");
                     valid = false;
                 }
             } catch (NumberFormatException exception) {
-                setFieldError("cgpa", "CGPA must be a valid number.");
+                setFieldError("cgpa", "Invalid number.");
                 valid = false;
             }
         }
 
         if (!email.isEmpty() && !EMAIL_PATTERN.matcher(email).matches()) {
-            setFieldError("email", "Enter a valid email address.");
+            setFieldError("email", "Invalid email address.");
             valid = false;
         }
 
         if (!phone.isEmpty() && !PHONE_PATTERN.matcher(phone).matches()) {
-            setFieldError("phone", "Phone number must contain 10 to 15 digits.");
+            setFieldError("phone", "10-15 digits required.");
             valid = false;
         }
 
         if (!password.isEmpty() && password.length() < 8) {
-            setFieldError("password", "Password must be at least 8 characters.");
+            setFieldError("password", "Min 8 characters.");
             valid = false;
         }
 
@@ -179,9 +229,9 @@ public class StudentRegistrationPanel extends JPanel {
                 exception -> {
                     Throwable cause = exception.getCause() != null ? exception.getCause() : exception;
                     if (cause instanceof ServiceException && cause.getMessage() != null) {
-                        generalErrorLabel.setText(cause.getMessage());
+                        generalErrorLabel.setText("⚠️ " + cause.getMessage());
                     } else {
-                        generalErrorLabel.setText("Registration failed, please try again.");
+                        generalErrorLabel.setText("⚠️ Registration failed, please try again.");
                     }
                 });
     }

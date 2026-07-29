@@ -8,6 +8,7 @@ public class LogoutButton extends JButton {
 
     public LogoutButton(AuthService authService, Runnable onLogout) {
         super("Logout");
+        UiStyles.styleSecondaryButton(this);
         addActionListener(event -> {
             authService.logout();
             onLogout.run();
