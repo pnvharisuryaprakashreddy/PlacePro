@@ -1,7 +1,7 @@
 # ⚡ PlacePro — Smart Campus Placement Management System (TPO Portal)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-indigo.svg)](LICENSE)
-[![Backend: Java & Node.js](https://img.shields.io/badge/Backend-Java%20%26%20Node.js-blue.svg)](#technology-stack)
+[![Backend: Node.js & Java](https://img.shields.io/badge/Backend-Node.js%20%26%20Java-blue.svg)](#technology-stack)
 [![Platform: Web](https://img.shields.io/badge/Platform-Web%20Portal-emerald.svg)](http://localhost:8080)
 [![Architecture: Fullstack Web](https://img.shields.io/badge/Architecture-Fullstack%20Web-cyan.svg)](#technology-stack)
 
@@ -66,11 +66,11 @@ PlacePro replaces fragmented manual record-keeping with a single, role-based **C
 
 ## 🛠️ Technology Stack & Architecture
 
-PlacePro uses a lightweight fullstack architecture backed by **Java & Node.js**:
+PlacePro uses a lightweight fullstack architecture backed by **Node.js & Java**:
 
 | Component / Layer | Technology Used | Simple Explanation |
 | :--- | :--- | :--- |
-| **Backend Web Service** | **Java & Node.js** | **The Backend Engine**: Powered by a lightweight web engine (`Server.java` / `server.js`) that handles REST API requests, processes student eligibility rules, and serves static pages on `http://localhost:8080`. |
+| **Backend Web Service** | **Node.js & Java** | **The Backend Engine**: Powered by a lightweight web engine (`server.js` / `Server.java`) that handles REST API requests, processes student eligibility rules, and serves static pages on `http://localhost:8080`. |
 | **Execution Script** | **Shell Script (`run.sh`)** | **One-Click Runner**: A simple 1-click launcher script (`./run.sh`) that starts the web server. |
 | **User Interface (Frontend)** | **HTML5, CSS3, JavaScript (ES6)** | **The Visual Portal**: <br>• **HTML**: Creates page structures.<br>• **CSS**: Styles the app with a dark theme & glassmorphic cards.<br>• **JavaScript**: Handles student eligibility checks & popup modals dynamically. |
 | **Analytics & Graphs** | **Chart.js** | **Visual Charts**: Draws interactive bar graphs and doughnut charts for department placement statistics and salary packages. |
@@ -92,10 +92,10 @@ PlacePro uses a lightweight fullstack architecture backed by **Java & Node.js**:
    ```bash
    ./run.sh
    ```
-   *(Or launch using Java or Node.js)*:
+   *(Or launch using Node.js or Java)*:
    ```bash
-   javac Server.java && java Server
-   # or: node server.js
+   node server.js
+   # or: javac Server.java && java Server
    ```
 
 3. **Open in Browser**:
