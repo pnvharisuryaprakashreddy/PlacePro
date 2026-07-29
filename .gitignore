@@ -1,8 +1,16 @@
+# Compiled Java Bytecode
+*.class
+
+# Build and Temp Directories
 target/
 logs/
+.DS_Store
+
+# IDE and Editor Files
 .idea/
 .vscode/
-*.class
 *.iml
+
+# Local Configuration & Data
 config.properties
 /resumes/
