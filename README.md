@@ -64,17 +64,17 @@ PlacePro replaces fragmented manual record-keeping with a single, role-based **C
 
 ---
 
-## 🛠️ Technology Stack & Architecture
+## 🛠️ Technology Stack & Simple Architecture Explanation
 
-PlacePro is engineered with a **Zero-Dependency Architecture** to ensure zero complex installation overhead, high performance, and total reliability on any operating system.
+PlacePro is engineered to be **lightweight, fast, and easy to run** on any computer without requiring extra installations like Maven, Tomcat, or complex server setups.
 
-| Layer | Technology | Purpose |
+| Component / Layer | Technology Used | Simple Explanation (What it does in plain words) |
 | :--- | :--- | :--- |
-| **Backend Core** | Java (JDK 11+) | Standalone HTTP Server (`Server.java`) using standard JDK `com.sun.net.httpserver` |
-| **Build & Dependencies** | Pure Java + Shell (`run.sh`) | **Zero Maven / Gradle dependency** (Compilable with standard `javac`) |
-| **Presentation Tier** | HTML5, Vanilla CSS3, JavaScript (ES6) | Responsive Single-Page Application (SPA) with dark slate glassmorphism UI |
-| **Graphics & Charts** | Chart.js | Dynamic placement percentage bar charts and recruiter doughnut graphs |
-| **Persistence** | Web Local Storage & REST APIs | Local state persistence and JSON endpoint responses |
+| **Backend Engine (Server)** | Java (JDK 11+) | **The Core Brain**: A lightweight Java program (`Server.java`) that runs in the background. It listens for web requests and serves the portal to your browser automatically. |
+| **Execution Script** | Shell Script (`run.sh`) | **One-Click Runner**: A 1-click script that compiles the Java code and starts the portal immediately without needing heavy installation tools. |
+| **User Interface (Frontend)** | HTML5, CSS3, JavaScript | **The Visual Portal**: <br>• **HTML**: Creates the structure (buttons, forms, tables).<br>• **CSS**: Colors and styles the app (modern dark theme, clean cards).<br>• **JavaScript**: Makes the page interactive (checks student CGPA cutoffs live & opens popup windows). |
+| **Analytics & Graphs** | Chart.js | **Visual Charts**: Draws interactive bar graphs and doughnut charts showing department placement rates and salary packages. |
+| **Data Storage & Flow** | REST API & Local Storage | **Data Memory**: <br>• **REST API**: Communicates data between the Java backend and web browser.<br>• **Local Storage**: Remembers student registrations, drive applications, and interview decisions right in the browser. |
 
 ---
 
