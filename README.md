@@ -1,7 +1,7 @@
 # ⚡ PlacePro — Smart Campus Placement Management System (TPO Portal)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-indigo.svg)](LICENSE)
-[![Backend: Node.js](https://img.shields.io/badge/Backend-Node.js-green.svg)](#technology-stack)
+[![Backend: Java & Node.js](https://img.shields.io/badge/Backend-Java%20%26%20Node.js-blue.svg)](#technology-stack)
 [![Platform: Web](https://img.shields.io/badge/Platform-Web%20Portal-emerald.svg)](http://localhost:8080)
 [![Architecture: Fullstack Web](https://img.shields.io/badge/Architecture-Fullstack%20Web-cyan.svg)](#technology-stack)
 
@@ -66,11 +66,11 @@ PlacePro replaces fragmented manual record-keeping with a single, role-based **C
 
 ## 🛠️ Technology Stack & Architecture
 
-PlacePro is built using a clean, modern **Single-Backend Web Stack**:
+PlacePro uses a lightweight fullstack architecture backed by **Java & Node.js**:
 
 | Component / Layer | Technology Used | Simple Explanation |
 | :--- | :--- | :--- |
-| **Backend Web Server** | **Node.js** | **The Backend Engine**: A lightweight Node.js web server (`server.js`) that handles REST API requests and serves the web portal on `http://localhost:8080`. |
+| **Backend Web Service** | **Java & Node.js** | **The Backend Engine**: Powered by a lightweight web engine (`Server.java` / `server.js`) that handles REST API requests, processes student eligibility rules, and serves static pages on `http://localhost:8080`. |
 | **Execution Script** | **Shell Script (`run.sh`)** | **One-Click Runner**: A simple 1-click launcher script (`./run.sh`) that starts the web server. |
 | **User Interface (Frontend)** | **HTML5, CSS3, JavaScript (ES6)** | **The Visual Portal**: <br>• **HTML**: Creates page structures.<br>• **CSS**: Styles the app with a dark theme & glassmorphic cards.<br>• **JavaScript**: Handles student eligibility checks & popup modals dynamically. |
 | **Analytics & Graphs** | **Chart.js** | **Visual Charts**: Draws interactive bar graphs and doughnut charts for department placement statistics and salary packages. |
@@ -92,9 +92,10 @@ PlacePro is built using a clean, modern **Single-Backend Web Stack**:
    ```bash
    ./run.sh
    ```
-   *(Or launch directly using Node.js)*:
+   *(Or launch using Java or Node.js)*:
    ```bash
-   node server.js
+   javac Server.java && java Server
+   # or: node server.js
    ```
 
 3. **Open in Browser**:
