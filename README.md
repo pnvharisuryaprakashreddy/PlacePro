@@ -1,7 +1,7 @@
 # ⚡ PlacePro — Smart Campus Placement Management System (TPO Portal)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-indigo.svg)](LICENSE)
-[![Backend: Node.js](https://img.shields.io/badge/Backend-Node.js%20Web%20Server-green.svg)](https://nodejs.org/)
+[![Backend: Node.js & Java](https://img.shields.io/badge/Backend-Node.js%20%26%20Java-blue.svg)](#technology-stack)
 [![Platform: Web](https://img.shields.io/badge/Platform-Web%20Portal-emerald.svg)](http://localhost:8080)
 [![Architecture: Zero--Dependency](https://img.shields.io/badge/Architecture-Fullstack%20Web-cyan.svg)](#technology-stack)
 
@@ -66,15 +66,15 @@ PlacePro replaces fragmented manual record-keeping with a single, role-based **C
 
 ## 🛠️ Technology Stack & Architecture
 
-PlacePro is built using standard, modern **Fullstack Web Technologies**:
+PlacePro uses a **lightweight, fullstack web stack** with simple background services:
 
-| Component / Layer | Technology Used | What it does in plain words |
+| Component / Layer | Technology Used | Simple Explanation |
 | :--- | :--- | :--- |
-| **Backend Web Server** | **Node.js Web Server** | **The Backend Engine**: A lightweight Node.js web server (`server.js`) that runs in the background. It serves the portal pages and handles REST API requests. |
-| **Execution Script** | **Shell Script (`run.sh`)** | **One-Click Runner**: A simple 1-click launcher script that starts the web server on `http://localhost:8080`. |
-| **User Interface (Frontend)** | **HTML5, CSS3, JavaScript (ES6)** | **The Visual Portal**: <br>• **HTML**: Creates the structure (buttons, forms, tables).<br>• **CSS**: Styles the app with modern dark theme & glassmorphic cards.<br>• **JavaScript**: Handles student eligibility checks & popup modals dynamically. |
+| **Backend Web Service** | **Node.js & Java Utility Engine** | **The Backend Service**: Powered by a lightweight web service (`server.js` / `Server.java`) that handles API requests and serves static pages on `http://localhost:8080`. |
+| **Execution Script** | **Shell Script (`run.sh`)** | **One-Click Runner**: A simple 1-click launcher script that compiles/runs the web service. |
+| **User Interface (Frontend)** | **HTML5, CSS3, JavaScript (ES6)** | **The Visual Portal**: <br>• **HTML**: Creates page structures.<br>• **CSS**: Styles the app with a dark theme & glassmorphic cards.<br>• **JavaScript**: Handles student eligibility checks & popup modals dynamically. |
 | **Analytics & Graphs** | **Chart.js** | **Visual Charts**: Draws interactive bar graphs and doughnut charts for department placement statistics and salary packages. |
-| **Data Storage & Flow** | **REST API & Local Storage** | **Data Management**: <br>• **REST API**: Passes data between the server and the browser.<br>• **Local Storage**: Saves student profiles, drive applications, and recruiter decisions in the browser. |
+| **Data Storage & Flow** | **REST API & Local Storage** | **Data Management**: <br>• **REST API**: Communicates data between server and browser.<br>• **Local Storage**: Saves student profiles, drive applications, and recruiter decisions in the browser. |
 
 ---
 
@@ -92,9 +92,10 @@ PlacePro is built using standard, modern **Fullstack Web Technologies**:
    ```bash
    ./run.sh
    ```
-   *(Or launch directly using Node.js)*:
+   *(Or launch using Node.js or Java)*:
    ```bash
    node server.js
+   # or: javac Server.java && java Server
    ```
 
 3. **Open in Browser**:
