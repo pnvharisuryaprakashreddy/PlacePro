@@ -1,9 +1,9 @@
 # ⚡ PlacePro — Smart Campus Placement Management System (TPO Portal)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-indigo.svg)](LICENSE)
-[![Java: JDK 11+](https://img.shields.io/badge/Java-JDK%2011%2B-blue.svg)](https://www.oracle.com/java/)
+[![Backend: Node.js](https://img.shields.io/badge/Backend-Node.js%20Web%20Server-green.svg)](https://nodejs.org/)
 [![Platform: Web](https://img.shields.io/badge/Platform-Web%20Portal-emerald.svg)](http://localhost:8080)
-[![Architecture: Zero--Dependency](https://img.shields.io/badge/Architecture-Zero--Dependency-cyan.svg)](#technology-stack)
+[![Architecture: Zero--Dependency](https://img.shields.io/badge/Architecture-Fullstack%20Web-cyan.svg)](#technology-stack)
 
 **PlacePro** is a modern, centralized **Campus Training & Placement Office (TPO) Management System** designed to automate and streamline the entire university placement lifecycle — from student registration and corporate onboarding to drive publication, real-time eligibility verification, candidate shortlisting, interview round tracking, and institutional accreditation reporting.
 
@@ -64,25 +64,21 @@ PlacePro replaces fragmented manual record-keeping with a single, role-based **C
 
 ---
 
-## 🛠️ Technology Stack & Simple Architecture Explanation
+## 🛠️ Technology Stack & Architecture
 
-PlacePro is engineered to be **lightweight, fast, and easy to run** on any computer without requiring extra installations like Maven, Tomcat, or complex server setups.
+PlacePro is built using standard, modern **Fullstack Web Technologies**:
 
-| Component / Layer | Technology Used | Simple Explanation (What it does in plain words) |
+| Component / Layer | Technology Used | What it does in plain words |
 | :--- | :--- | :--- |
-| **Backend Engine (Server)** | Java (JDK 11+) | **The Core Brain**: A lightweight Java program (`Server.java`) that runs in the background. It listens for web requests and serves the portal to your browser automatically. |
-| **Execution Script** | Shell Script (`run.sh`) | **One-Click Runner**: A 1-click script that compiles the Java code and starts the portal immediately without needing heavy installation tools. |
-| **User Interface (Frontend)** | HTML5, CSS3, JavaScript | **The Visual Portal**: <br>• **HTML**: Creates the structure (buttons, forms, tables).<br>• **CSS**: Colors and styles the app (modern dark theme, clean cards).<br>• **JavaScript**: Makes the page interactive (checks student CGPA cutoffs live & opens popup windows). |
-| **Analytics & Graphs** | Chart.js | **Visual Charts**: Draws interactive bar graphs and doughnut charts showing department placement rates and salary packages. |
-| **Data Storage & Flow** | REST API & Local Storage | **Data Memory**: <br>• **REST API**: Communicates data between the Java backend and web browser.<br>• **Local Storage**: Remembers student registrations, drive applications, and interview decisions right in the browser. |
+| **Backend Web Server** | **Node.js Web Server** | **The Backend Engine**: A lightweight Node.js web server (`server.js`) that runs in the background. It serves the portal pages and handles REST API requests. |
+| **Execution Script** | **Shell Script (`run.sh`)** | **One-Click Runner**: A simple 1-click launcher script that starts the web server on `http://localhost:8080`. |
+| **User Interface (Frontend)** | **HTML5, CSS3, JavaScript (ES6)** | **The Visual Portal**: <br>• **HTML**: Creates the structure (buttons, forms, tables).<br>• **CSS**: Styles the app with modern dark theme & glassmorphic cards.<br>• **JavaScript**: Handles student eligibility checks & popup modals dynamically. |
+| **Analytics & Graphs** | **Chart.js** | **Visual Charts**: Draws interactive bar graphs and doughnut charts for department placement statistics and salary packages. |
+| **Data Storage & Flow** | **REST API & Local Storage** | **Data Management**: <br>• **REST API**: Passes data between the server and the browser.<br>• **Local Storage**: Saves student profiles, drive applications, and recruiter decisions in the browser. |
 
 ---
 
 ## 🚀 How to Run PlacePro Locally
-
-### Prerequisites
-* **Java Development Kit (JDK 11 or higher)** installed on your machine.
-* Any standard Web Browser (Chrome, Edge, Safari, Firefox).
 
 ### Step-by-Step Launch Guide
 
@@ -92,13 +88,13 @@ PlacePro is engineered to be **lightweight, fast, and easy to run** on any compu
    cd PlacePro
    ```
 
-2. **Run the One-Command Launcher**:
+2. **Run the Server**:
    ```bash
    ./run.sh
    ```
-   *(Or manually compile and run using standard Java)*:
+   *(Or launch directly using Node.js)*:
    ```bash
-   javac Server.java && java Server
+   node server.js
    ```
 
 3. **Open in Browser**:

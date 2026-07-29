@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
-echo "🔨 Compiling PlacePro Standalone Server..."
-javac Server.java
-if [ $? -eq 0 ]; then
-  echo "🚀 Starting PlacePro Enterprise Server on http://localhost:8080..."
-  java Server
+echo "⚡ Starting PlacePro Campus Placement Portal Server..."
+
+if command -v node &> /dev/null
+then
+    echo "🚀 Launching Node Web Engine on http://localhost:8080..."
+    node server.js
 else
-  echo "❌ Compilation failed!"
-  exit 1
+    echo "🔨 Compiling Standalone Server..."
+    javac Server.java && java Server
 fi
