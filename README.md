@@ -91,15 +91,15 @@ placepro_log_events_total{level="ERROR"} 0
 
 ## 🛠️ Technology Stack & Architecture
 
-PlacePro is engineered with a **Zero-Dependency Architecture** to ensure zero complex installation overhead, high performance, and total reliability on any operating system.
+PlacePro uses a lightweight fullstack architecture backed by Node.js & Java:
 
 | Component / Layer | Technology Used | Simple Explanation |
 | :--- | :--- | :--- |
-| **Backend Web Service** | **Node.js & Java** | **The Backend Engine**: Powered by a lightweight web engine (`server.js` / `Server.java`) that handles REST API requests, processes student eligibility rules, and serves Prometheus `/metrics` on `http://localhost:8080`. |
-| **Execution Script** | **Shell Script (`run.sh`)** | **One-Click Runner**: A simple 1-click launcher script (`./run.sh`) that starts the web server. |
-| **User Interface (Frontend)** | **HTML5, CSS3, JavaScript (ES6)** | **The Visual Portal**: <br>• **HTML**: Creates page structures.<br>• **CSS**: Styles the app with a dark theme & glassmorphic cards.<br>• **JavaScript**: Handles student eligibility checks & popup modals dynamically. |
-| **Analytics & Monitoring** | **Chart.js & Prometheus** | **Visual Charts & Metrics**: Interactive bar graphs, doughnut charts, and Prometheus log observability (`/metrics`). |
-| **Data Storage & Flow** | **REST API & Local Storage** | **Data Management**: <br>• **REST API**: Communicates data between server and browser.<br>• **Local Storage**: Saves student profiles, drive applications, and recruiter decisions in the browser. |
+| **Backend Web Service** | **Node.js & Java** | **The Backend Engine**: Powered by a lightweight web engine (server.js / Server.java) that handles REST API requests, processes student eligibility rules, and serves Prometheus /metrics on http://localhost:8080. |
+| **Execution Script** | **Shell Script (run.sh)** | **One-Click Runner**: A simple 1-click launcher script (./run.sh) that starts the web server. |
+| **User Interface (Frontend)** | **HTML5, CSS3, JavaScript** | **The Visual Portal**: <br>• HTML: Creates page structures.<br>• CSS: Styles the app with a dark theme & glassmorphic cards.<br>• JavaScript: Handles student eligibility checks & popup modals dynamically. |
+| **Analytics & Monitoring** | **Chart.js & Prometheus** | **Visual Charts & Metrics**: Interactive bar graphs, doughnut charts, and Prometheus log observability (/metrics). |
+| **Data Storage & Flow** | **Local Storage** | **Data Management**: <br>Local Storage: Saves student profiles, drive applications, and recruiter decisions in the browser. |
 
 ---
 
