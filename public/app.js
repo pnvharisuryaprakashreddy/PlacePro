@@ -1,4 +1,4 @@
-// PlacePro Campus TPO Placement Portal Engine
+// PlacePro Campus TPO Placement Portal Engine with Prometheus Real-Time Telemetry
 
 // State Store
 let currentUser = null;
@@ -59,6 +59,15 @@ function saveData() {
   localStorage.setItem('placepro_apps', JSON.stringify(applicationsList));
 }
 
+// Telemetry Metric Helper
+function reportMetricEvent(path, payload) {
+  fetch(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).catch(() => {});
+}
+
 // Navigation & Auth Flow
 function showAuthScreen(screen) {
   document.getElementById('landingView').style.display = 'none';
@@ -98,16 +107,14 @@ function logout() {
   showAuthScreen('landing');
 }
 
-// Student Login & Register Handlers with Dynamic Student Search
+// Student Login & Register Handlers with Dynamic Telemetry
 function handleStudentLogin(e) {
   e.preventDefault();
   const emailInput = document.getElementById('studentEmail').value.trim();
 
-  // Find student matching email in saved students store
   let foundStudent = studentsList.find(s => s.email.toLowerCase() === emailInput.toLowerCase());
 
   if (!foundStudent) {
-    // Generate user profile dynamically based on input email
     const nameFromEmail = emailInput.split('@')[0].replace('.', ' ').replace(/\b\w/g, c => c.toUpperCase());
     const rollFromEmail = '2022' + (emailInput.substring(0, 3).toUpperCase()) + Math.floor(100 + Math.random() * 900);
 
@@ -126,6 +133,7 @@ function handleStudentLogin(e) {
 
   currentUser = foundStudent;
   currentRole = 'student';
+  reportMetricEvent('/api/auth/login', { role: 'student', success: true });
   launchDashboard();
 }
 
@@ -139,7 +147,6 @@ function handleStudentRegister(e) {
   const backlogs = parseInt(document.getElementById('regBacklogs').value);
   const email = document.getElementById('regEmail').value.trim();
 
-  // Create new registered student object
   const newStudent = {
     id: Date.now(),
     name: name,
@@ -150,12 +157,13 @@ function handleStudentRegister(e) {
     email: email
   };
 
-  // Add to students list and persist
   studentsList.unshift(newStudent);
   saveData();
 
   currentUser = newStudent;
   currentRole = 'student';
+  reportMetricEvent('/api/auth/register', { branch: branch });
+  reportMetricEvent('/api/auth/login', { role: 'student', success: true });
   launchDashboard();
 
   alert(`🎉 Welcome ${newStudent.name}! Your student registration is complete.`);
@@ -165,6 +173,7 @@ function handleOfficerLogin(e) {
   e.preventDefault();
   currentUser = { id: 10, name: 'Dr. Anita Rao', roleName: 'Head Placement Officer' };
   currentRole = 'officer';
+  reportMetricEvent('/api/auth/login', { role: 'officer', success: true });
   launchDashboard();
 }
 
@@ -176,6 +185,7 @@ function handleRecruiterLogin(e) {
 
   currentUser = { id: 20, name: nameFromEmail || 'Corporate Recruiter', company: company };
   currentRole = 'recruiter';
+  reportMetricEvent('/api/auth/login', { role: 'recruiter', success: true });
   launchDashboard();
 }
 
@@ -183,6 +193,7 @@ function handleAdminLogin(e) {
   e.preventDefault();
   currentUser = { id: 30, name: 'Rahul Mehta', roleName: 'System Administrator' };
   currentRole = 'admin';
+  reportMetricEvent('/api/auth/login', { role: 'admin', success: true });
   launchDashboard();
 }
 
@@ -428,6 +439,7 @@ function officerShortlistApp(appId) {
     app.venue = 'Shortlisted for Interview Round';
     saveData();
     renderOfficerReviewQueue();
+    reportMetricEvent('/api/interviews/schedule', { round: 'Technical' });
     alert(`⭐ Candidate ${app.studentName} shortlisted for ${app.company}!`);
   }
 }
@@ -439,6 +451,7 @@ function officerRejectApp(appId) {
     app.venue = 'Not Recommended';
     saveData();
     renderOfficerReviewQueue();
+    reportMetricEvent('/api/interviews/evaluate', { outcome: 'REJECTED' });
   }
 }
 
@@ -544,6 +557,7 @@ function handleRecordEvaluation(e) {
   saveData();
   renderRecruiterCandidates();
   closeEvalModal();
+  reportMetricEvent('/api/interviews/evaluate', { outcome: decision });
   alert(`Decision Saved: Candidate ${activeEvalApp.studentName} marked as ${decision}!`);
 }
 
