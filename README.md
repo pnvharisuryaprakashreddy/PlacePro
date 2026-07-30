@@ -73,19 +73,17 @@ PlacePro features built-in **Prometheus metrics exposition** to monitor server t
 
 ### Monitored Prometheus Metrics:
 ```prometheus
-# Server Uptime & Traffic Counters
-placepro_server_uptime_seconds 120
-placepro_http_requests_total 48
+# User Logins & Failures
+placepro_user_login_success_total{role="student"} 124
+placepro_user_login_failure_total{role="student",reason="invalid_credentials"} 6
 
-# Placement & Recruitment Gauges
-placepro_active_drives_total 12
-placepro_student_applications_total 504
-placepro_placements_total 148
-placepro_placement_percentage 86.4
+# Interview Rounds & Outcomes
+placepro_interviews_scheduled_total{round_type="Technical"} 62
+placepro_interview_outcomes_total{result="SELECTED"} 148
 
 # System Log Counters by Level
-placepro_log_events_total{level="INFO"} 142
-placepro_log_events_total{level="WARN"} 8
+placepro_log_events_total{level="INFO"} 280
+placepro_log_events_total{level="WARN"} 12
 placepro_log_events_total{level="ERROR"} 0
 ```
 
@@ -93,15 +91,13 @@ placepro_log_events_total{level="ERROR"} 0
 
 ## 🛠️ Technology Stack & Architecture
 
-PlacePro uses a lightweight fullstack architecture backed by **Node.js & Java**:
-
-| Component / Layer | Technology Used | Simple Explanation |
+| Layer | Technology | Purpose |
 | :--- | :--- | :--- |
-| **Backend Web Service** | **Node.js & Java** | **The Backend Engine**: Powered by a lightweight web engine (`server.js` / `Server.java`) that handles REST API requests, processes student eligibility rules, and serves Prometheus `/metrics` on `http://localhost:8080`. |
-| **Execution Script** | **Shell Script (`run.sh`)** | **One-Click Runner**: A simple 1-click launcher script (`./run.sh`) that starts the web server. |
-| **User Interface (Frontend)** | **HTML5, CSS3, JavaScript (ES6)** | **The Visual Portal**: <br>• **HTML**: Creates page structures.<br>• **CSS**: Styles the app with a dark theme & glassmorphic cards.<br>• **JavaScript**: Handles student eligibility checks & popup modals dynamically. |
-| **Analytics & Monitoring** | **Chart.js & Prometheus** | **Visual Charts & Metrics**: Interactive bar graphs, doughnut charts, and Prometheus log observability (`/metrics`). |
-| **Data Storage & Flow** | **REST API & Local Storage** | **Data Management**: <br>• **REST API**: Communicates data between server and browser.<br>• **Local Storage**: Saves student profiles, drive applications, and recruiter decisions in the browser. |
+| **Backend** | Node.js & Java | Handles REST APIs, eligibility logic, and `/metrics` on port 8080 |
+| **Frontend** | HTML5, CSS3, JS (ES6) | Single-page UI with dark theme, dynamic forms, and modal popups |
+| **Analytics & Metrics** | Chart.js & Prometheus | Live department charts and Prometheus log & telemetry monitoring |
+| **Data Storage** | Local Storage & REST API | Manages student profiles, drive applications, and recruiter decisions |
+| **Launcher** | Shell Script (`run.sh`) | 1-click script to start the web server |
 
 ---
 
@@ -118,11 +114,6 @@ PlacePro uses a lightweight fullstack architecture backed by **Node.js & Java**:
 2. **Run the Server**:
    ```bash
    ./run.sh
-   ```
-   *(Or launch using Node.js or Java)*:
-   ```bash
-   node server.js
-   # or: javac Server.java && java Server
    ```
 
 3. **Open in Browser**:
