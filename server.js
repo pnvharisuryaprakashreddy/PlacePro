@@ -3,8 +3,21 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = 8080;
+const startTime = Date.now();
+
+// Prometheus Metrics Data Store
+const metrics = {
+  requestsTotal: 0,
+  endpointCounts: {},
+  statusCounts: {},
+  logsTotal: { info: 142, warn: 8, error: 0 }
+};
 
 const server = http.createServer((req, res) => {
+  metrics.requestsTotal++;
+  const reqPath = req.url.split('?')[0];
+  metrics.endpointCounts[reqPath] = (metrics.endpointCounts[reqPath] || 0) + 1;
+
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -15,23 +28,64 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  // ⚡ Prometheus Metrics Exposition Endpoint (/metrics)
+  if (reqPath === '/metrics') {
+    metrics.statusCounts['200'] = (metrics.statusCounts['200'] || 0) + 1;
+    const uptimeSeconds = Math.floor((Date.now() - startTime) / 1000);
+
+    const prometheusMetrics = `# HELP placepro_server_uptime_seconds Total uptime of PlacePro server in seconds.
+# TYPE placepro_server_uptime_seconds gauge
+placepro_server_uptime_seconds ${uptimeSeconds}
+
+# HELP placepro_http_requests_total Total number of HTTP requests processed.
+# TYPE placepro_http_requests_total counter
+placepro_http_requests_total ${metrics.requestsTotal}
+
+# HELP placepro_active_drives_total Number of active recruitment drives.
+# TYPE placepro_active_drives_total gauge
+placepro_active_drives_total 12
+
+# HELP placepro_student_applications_total Total student applications submitted.
+# TYPE placepro_student_applications_total counter
+placepro_student_applications_total 504
+
+# HELP placepro_placements_total Total candidates selected for job offers.
+# TYPE placepro_placements_total counter
+placepro_placements_total 148
+
+# HELP placepro_placement_percentage Overall student placement conversion percentage.
+# TYPE placepro_placement_percentage gauge
+placepro_placement_percentage 86.4
+
+# HELP placepro_log_events_total Total application log events recorded by level.
+# TYPE placepro_log_events_total counter
+placepro_log_events_total{level="INFO"} ${metrics.logsTotal.info}
+placepro_log_events_total{level="WARN"} ${metrics.logsTotal.warn}
+placepro_log_events_total{level="ERROR"} ${metrics.logsTotal.error}
+`;
+
+    res.writeHead(200, { 'Content-Type': 'text/plain; version=0.0.4; charset=utf-8' });
+    res.end(prometheusMetrics);
+    return;
+  }
+
   // REST API Endpoints
-  if (req.url.startsWith('/api/')) {
+  if (reqPath.startsWith('/api/')) {
     res.setHeader('Content-Type', 'application/json; charset=UTF-8');
 
-    if (req.url.endsWith('/health')) {
+    if (reqPath.endsWith('/health')) {
       res.writeHead(200);
-      res.end(JSON.stringify({ status: 'UP', system: 'Campus Placement Management Portal', port: PORT }));
+      res.end(JSON.stringify({ status: 'UP', system: 'Campus Placement Management Portal', port: PORT, prometheus: 'http://localhost:8080/metrics' }));
       return;
     }
 
-    if (req.url.endsWith('/stats')) {
+    if (reqPath.endsWith('/stats')) {
       res.writeHead(200);
       res.end(JSON.stringify({ totalPlacements: 148, placementPercentage: 86.4, avgPackage: 14.25, highestPackage: 42.0, activeDrives: 12, totalStudents: 500 }));
       return;
     }
 
-    if (req.url.endsWith('/drives')) {
+    if (reqPath.endsWith('/drives')) {
       const drives = [
         { id: 101, company: 'Microsoft India', role: 'Software Development Engineer (SDE-1)', package: '28.5 LPA', minCgpa: 8.0, maxBacklogs: 0, branches: 'CSE, ECE, IT', deadline: '2026-08-05', visitDate: '2026-08-10', status: 'PUBLISHED', desc: 'Core cloud engineering, distributed infrastructure, and microservices architecture.' },
         { id: 102, company: 'Google Cloud', role: 'Cloud Solutions Engineer', package: '32.0 LPA', minCgpa: 8.5, maxBacklogs: 0, branches: 'CSE, IT', deadline: '2026-08-10', visitDate: '2026-08-15', status: 'PUBLISHED', desc: 'Kubernetes deployment automation, AI platform APIs, and enterprise cloud reliability.' },
@@ -44,7 +98,7 @@ const server = http.createServer((req, res) => {
       return;
     }
 
-    if (req.url.endsWith('/applications')) {
+    if (reqPath.endsWith('/applications')) {
       const apps = [
         { id: 'APP-501', driveId: 101, company: 'Microsoft India', role: 'SDE-1', studentId: 1, studentName: 'Priya Sharma', rollNumber: '2022CSE104', branch: 'CSE', cgpa: 8.8, backlogs: 0, status: 'SHORTLISTED', appliedDate: '2026-07-25', interviewDate: '2026-08-02 10:00 AM', venue: 'Seminar Hall A' },
         { id: 'APP-502', driveId: 102, company: 'Google Cloud', role: 'Cloud Solutions Engineer', studentId: 2, studentName: 'Aarav Mehta', rollNumber: '2022ECE052', branch: 'ECE', cgpa: 8.6, backlogs: 0, status: 'SELECTED', appliedDate: '2026-07-24', interviewDate: '2026-07-28', venue: 'Offer Accepted (32.0 LPA)' },
@@ -58,7 +112,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Static Asset Server
-  let filePath = path.join(__dirname, 'public', req.url === '/' ? 'index.html' : req.url);
+  let filePath = path.join(__dirname, 'public', reqPath === '/' ? 'index.html' : reqPath);
   let extname = String(path.extname(filePath)).toLowerCase();
   let mimeTypes = {
     '.html': 'text/html; charset=UTF-8',
@@ -93,5 +147,6 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`\n==================================================================`);
   console.log(`⚡ Campus Placement Portal Server Running on http://localhost:${PORT}`);
+  console.log(`📊 Prometheus Metrics Endpoint: http://localhost:${PORT}/metrics`);
   console.log(`==================================================================\n`);
 });

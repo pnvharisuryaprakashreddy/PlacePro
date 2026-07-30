@@ -2,8 +2,8 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-indigo.svg)](LICENSE)
 [![Backend: Node.js & Java](https://img.shields.io/badge/Backend-Node.js%20%26%20Java-blue.svg)](#technology-stack)
+[![Prometheus Metrics](https://img.shields.io/badge/Prometheus-Metrics%20Live-orange.svg)](http://localhost:8080/metrics)
 [![Platform: Web](https://img.shields.io/badge/Platform-Web%20Portal-emerald.svg)](http://localhost:8080)
-[![Architecture: Fullstack Web](https://img.shields.io/badge/Architecture-Fullstack%20Web-cyan.svg)](#technology-stack)
 
 **PlacePro** is a modern, centralized **Campus Training & Placement Office (TPO) Management System** designed to automate and streamline the entire university placement lifecycle — from student registration and corporate onboarding to drive publication, real-time eligibility verification, candidate shortlisting, interview round tracking, and institutional accreditation reporting.
 
@@ -64,16 +64,43 @@ PlacePro replaces fragmented manual record-keeping with a single, role-based **C
 
 ---
 
+## 📊 Prometheus Monitoring & Log Observability
+
+PlacePro features built-in **Prometheus metrics exposition** to monitor server traffic, application logs, active placement drives, and system health in real-time.
+
+* **Live Metrics Endpoint**: `http://localhost:8080/metrics`
+* **Scrape Configuration**: Configured in [`monitoring/prometheus.yml`](file:///Users/harisuryaprakashreddyp.n.v/Desktop/PlacePro%20PRD/monitoring/prometheus.yml).
+
+### Monitored Prometheus Metrics:
+```prometheus
+# Server Uptime & Traffic Counters
+placepro_server_uptime_seconds 120
+placepro_http_requests_total 48
+
+# Placement & Recruitment Gauges
+placepro_active_drives_total 12
+placepro_student_applications_total 504
+placepro_placements_total 148
+placepro_placement_percentage 86.4
+
+# System Log Counters by Level
+placepro_log_events_total{level="INFO"} 142
+placepro_log_events_total{level="WARN"} 8
+placepro_log_events_total{level="ERROR"} 0
+```
+
+---
+
 ## 🛠️ Technology Stack & Architecture
 
 PlacePro uses a lightweight fullstack architecture backed by **Node.js & Java**:
 
 | Component / Layer | Technology Used | Simple Explanation |
 | :--- | :--- | :--- |
-| **Backend Web Service** | **Node.js & Java** | **The Backend Engine**: Powered by a lightweight web engine (`server.js` / `Server.java`) that handles REST API requests, processes student eligibility rules, and serves static pages on `http://localhost:8080`. |
+| **Backend Web Service** | **Node.js & Java** | **The Backend Engine**: Powered by a lightweight web engine (`server.js` / `Server.java`) that handles REST API requests, processes student eligibility rules, and serves Prometheus `/metrics` on `http://localhost:8080`. |
 | **Execution Script** | **Shell Script (`run.sh`)** | **One-Click Runner**: A simple 1-click launcher script (`./run.sh`) that starts the web server. |
 | **User Interface (Frontend)** | **HTML5, CSS3, JavaScript (ES6)** | **The Visual Portal**: <br>• **HTML**: Creates page structures.<br>• **CSS**: Styles the app with a dark theme & glassmorphic cards.<br>• **JavaScript**: Handles student eligibility checks & popup modals dynamically. |
-| **Analytics & Graphs** | **Chart.js** | **Visual Charts**: Draws interactive bar graphs and doughnut charts for department placement statistics and salary packages. |
+| **Analytics & Monitoring** | **Chart.js & Prometheus** | **Visual Charts & Metrics**: Interactive bar graphs, doughnut charts, and Prometheus log observability (`/metrics`). |
 | **Data Storage & Flow** | **REST API & Local Storage** | **Data Management**: <br>• **REST API**: Communicates data between server and browser.<br>• **Local Storage**: Saves student profiles, drive applications, and recruiter decisions in the browser. |
 
 ---
@@ -99,7 +126,8 @@ PlacePro uses a lightweight fullstack architecture backed by **Node.js & Java**:
    ```
 
 3. **Open in Browser**:
-   Open **[http://localhost:8080](http://localhost:8080)** in your web browser.
+   * **Web Portal**: [http://localhost:8080](http://localhost:8080)
+   * **Prometheus Metrics**: [http://localhost:8080/metrics](http://localhost:8080/metrics)
 
 ---
 

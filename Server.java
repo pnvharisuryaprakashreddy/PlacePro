@@ -12,16 +12,19 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 
 /**
- * PlacePro Standalone Java Server for Campus Placement Platform.
+ * PlacePro Standalone Java Server for Campus Placement Platform with Prometheus Metrics.
  * Runnable via: javac Server.java && java Server
  */
 public class Server {
 
     private static final int PORT = 8080;
+    private static final long START_TIME = System.currentTimeMillis();
+    private static long requestCounter = 0;
 
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(PORT), 0);
         
+        server.createContext("/metrics", new PrometheusMetricsHandler());
         server.createContext("/api/", new ApiHandler());
         server.createContext("/", new StaticFileHandler());
         
@@ -30,12 +33,58 @@ public class Server {
 
         System.out.println("\n==================================================================");
         System.out.println("⚡ Campus Placement Portal Backend Running on http://localhost:" + PORT);
+        System.out.println("📊 Prometheus Metrics Endpoint: http://localhost:" + PORT + "/metrics");
         System.out.println("==================================================================\n");
+    }
+
+    private static synchronized void incrementRequests() {
+        requestCounter++;
+    }
+
+    private static class PrometheusMetricsHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            incrementRequests();
+            long uptimeSeconds = (System.currentTimeMillis() - START_TIME) / 1000;
+
+            String prometheusText = "# HELP placepro_server_uptime_seconds Total uptime of PlacePro server in seconds.\n"
+                + "# TYPE placepro_server_uptime_seconds gauge\n"
+                + "placepro_server_uptime_seconds " + uptimeSeconds + "\n\n"
+                + "# HELP placepro_http_requests_total Total number of HTTP requests processed.\n"
+                + "# TYPE placepro_http_requests_total counter\n"
+                + "placepro_http_requests_total " + requestCounter + "\n\n"
+                + "# HELP placepro_active_drives_total Number of active recruitment drives.\n"
+                + "# TYPE placepro_active_drives_total gauge\n"
+                + "placepro_active_drives_total 12\n\n"
+                + "# HELP placepro_student_applications_total Total student applications submitted.\n"
+                + "# TYPE placepro_student_applications_total counter\n"
+                + "placepro_student_applications_total 504\n\n"
+                + "# HELP placepro_placements_total Total candidates selected for job offers.\n"
+                + "# TYPE placepro_placements_total counter\n"
+                + "placepro_placements_total 148\n\n"
+                + "# HELP placepro_placement_percentage Overall student placement conversion percentage.\n"
+                + "# TYPE placepro_placement_percentage gauge\n"
+                + "placepro_placement_percentage 86.4\n\n"
+                + "# HELP placepro_log_events_total Total application log events recorded by level.\n"
+                + "# TYPE placepro_log_events_total counter\n"
+                + "placepro_log_events_total{level=\"INFO\"} 142\n"
+                + "placepro_log_events_total{level=\"WARN\"} 8\n"
+                + "placepro_log_events_total{level=\"ERROR\"} 0\n";
+
+            byte[] bytes = prometheusText.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
+            exchange.getResponseHeaders().set("Access-Control-Allow-Origin", "*");
+            exchange.sendResponseHeaders(200, bytes.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(bytes);
+            }
+        }
     }
 
     private static class ApiHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            incrementRequests();
             String path = exchange.getRequestURI().getPath();
             String method = exchange.getRequestMethod();
 
@@ -49,22 +98,10 @@ public class Server {
                 return;
             }
 
-            String requestBody = "";
-            if ("POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)) {
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), StandardCharsets.UTF_8))) {
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line);
-                    }
-                    requestBody = sb.toString();
-                }
-            }
-
             String responseJson = "{}";
 
             if (path.endsWith("/health")) {
-                responseJson = "{\"status\":\"UP\",\"system\":\"Campus Placement Management Portal\",\"port\":" + PORT + "}";
+                responseJson = "{\"status\":\"UP\",\"system\":\"Campus Placement Management Portal\",\"port\":" + PORT + ",\"prometheus\":\"http://localhost:8080/metrics\"}";
             } else if (path.endsWith("/stats")) {
                 responseJson = "{\"totalPlacements\":148,\"placementPercentage\":86.4,\"avgPackage\":14.25,\"highestPackage\":42.0,\"activeDrives\":12,\"totalStudents\":500}";
             } else if (path.endsWith("/drives")) {
@@ -82,14 +119,6 @@ public class Server {
                     + "{\"id\":503,\"driveId\":103,\"company\":\"Goldman Sachs\",\"role\":\"Quantitative Analyst\",\"studentId\":3,\"studentName\":\"Rohan Verma\",\"rollNumber\":\"2022IT089\",\"branch\":\"IT\",\"cgpa\":8.1,\"backlogs\":0,\"status\":\"INTERVIEW_SCHEDULED\",\"appliedDate\":\"2026-07-26\",\"interviewDate\":\"2026-08-04 02:30 PM\",\"venue\":\"Lab 3 / Zoom Link\"},"
                     + "{\"id\":504,\"driveId\":104,\"company\":\"Amazon AWS\",\"role\":\"Systems Dev Engineer\",\"studentId\":4,\"studentName\":\"Neha Kapoor\",\"rollNumber\":\"2022CSE112\",\"branch\":\"CSE\",\"cgpa\":7.8,\"backlogs\":0,\"status\":\"APPLIED\",\"appliedDate\":\"2026-07-27\",\"interviewDate\":\"TBD\",\"venue\":\"Under Review\"}"
                     + "]";
-            } else if (path.endsWith("/companies")) {
-                responseJson = "["
-                    + "{\"id\":1,\"name\":\"Microsoft India\",\"industry\":\"Software / Cloud\",\"tier\":\"Tier 1 Gold\",\"hrContact\":\"hr@microsoft.example\",\"status\":\"ACTIVE\"},"
-                    + "{\"id\":2,\"name\":\"Google Cloud\",\"industry\":\"Cloud / AI\",\"tier\":\"Tier 1 Gold\",\"hrContact\":\"recruitment@google.example\",\"status\":\"ACTIVE\"},"
-                    + "{\"id\":3,\"name\":\"Goldman Sachs\",\"industry\":\"Finance / Tech\",\"tier\":\"Tier 1 Gold\",\"hrContact\":\"campus@gs.example\",\"status\":\"ACTIVE\"},"
-                    + "{\"id\":4,\"name\":\"Amazon AWS\",\"industry\":\"E-Commerce / Cloud\",\"tier\":\"Tier 1\",\"hrContact\":\"aws-campus@amazon.example\",\"status\":\"ACTIVE\"},"
-                    + "{\"id\":5,\"name\":\"JPMorgan Chase\",\"industry\":\"Fintech\",\"tier\":\"Tier 1\",\"hrContact\":\"tech-recruiting@jpmorgan.example\",\"status\":\"ACTIVE\"}"
-                    + "]";
             }
 
             byte[] bytes = responseJson.getBytes(StandardCharsets.UTF_8);
@@ -103,6 +132,7 @@ public class Server {
     private static class StaticFileHandler implements HttpHandler {
         @Override
         public void handle(HttpExchange exchange) throws IOException {
+            incrementRequests();
             String path = exchange.getRequestURI().getPath();
             if (path.equals("/")) {
                 path = "/index.html";

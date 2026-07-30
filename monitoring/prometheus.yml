@@ -1,32 +1,15 @@
-# Prometheus scrape configuration for PlacePro desktop clients.
-#
-# Each PlacePro client exposes /metrics on port 9400 (configurable via
-# metrics.port in config.properties). Add one target per lab machine.
-
+# Prometheus Scrape Configuration for PlacePro Campus Placement Portal
 global:
-  scrape_interval: 15s
-  evaluation_interval: 15s
+  scrape_interval: 10s
+  evaluation_interval: 10s
 
 scrape_configs:
-  - job_name: "placepro-clients"
+  - job_name: "placepro-server"
+    metrics_path: "/metrics"
     static_configs:
-      # When Prometheus runs inside Docker (docker-compose.yml in this folder),
-      # host.docker.internal resolves to the machine running Docker, so this
-      # target scrapes a PlacePro client running on localhost:9400.
       - targets:
-          - "host.docker.internal:9400"
+          - "localhost:8080"
+          - "host.docker.internal:8080"
         labels:
-          machine: "dev-localhost"
-      # Fleet example: uncomment and adjust one target per lab machine.
-      # - targets:
-      #     - "lab-pc-01.campus.lan:9400"
-      #   labels:
-      #     machine: "lab-pc-01"
-      # - targets:
-      #     - "lab-pc-02.campus.lan:9400"
-      #   labels:
-      #     machine: "lab-pc-02"
-      # - targets:
-      #     - "placement-office-desk.campus.lan:9400"
-      #   labels:
-      #     machine: "placement-office"
+          environment: "production"
+          service: "placepro-tpo-portal"
