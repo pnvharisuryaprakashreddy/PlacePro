@@ -231,6 +231,20 @@ placepro_log_events_total{level="ERROR"} ${metrics.logsTotal.error}
   });
 });
 
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.log(`⚠️ Port ${PORT} is busy. Clearing old process and retrying...`);
+    try {
+      require('child_process').execSync(`lsof -ti:${PORT} | xargs kill -9 2>/dev/null || true`);
+    } catch (e) {}
+    setTimeout(() => {
+      server.listen(PORT);
+    }, 1000);
+  } else {
+    console.error('Server error:', err);
+  }
+});
+
 server.listen(PORT, () => {
   console.log(`\n==================================================================`);
   console.log(`⚡ Campus Placement Portal Server Running on http://localhost:${PORT}`);
